@@ -1,0 +1,70 @@
+Sub Update_Manuelle_TEST()
+
+    'Application.ScreenUpdating = False
+
+    'On stocke la page initiale dans un onglet de passage // OK
+    Sheets("TEST_DONNEES").Copy Before:=Sheets("TEST_ARCHIVES")
+    ActiveSheet.Name = "Passage"
+         
+    'On supprime les données du tableau et on transforme le tableau en une simple plage de données // OK
+    Dim ws As Worksheet, tbl As ListObject
+    Set ws = Worksheets("TEST_DONNEES")
+
+    For Each tbl In ws.ListObjects
+        'If tbl.Name = "Table26" Then
+            tbl.DataBodyRange.Columns(2).Resize(, 32).ClearContents
+            tbl.Unlist
+        'End If
+    Next tbl
+    
+    Set ws = Nothing
+    
+    'On insère la formule de l'add-in Fitch dans D4 et on actualise la date de dernière modification dans "A1" // OK
+    Sheets("TEST_DONNEES").Range("D4").Formula = "=FC.IfError(FC.ED(""F!""&$C$4:$C$67,$D$2:$AI$2), ""-"")"
+    
+    'On copie-colle notre page afin d'obtenir des valeurs et non plus des formules (plus facilement manipulable) // OK
+    Sheets("TEST_DONNEES").Cells.Select
+    Selection.Copy
+    Selection.PasteSpecial Paste:=xlPasteValues, Operation:=xlNone, SkipBlanks _
+        :=False, Transpose:=False
+        
+    'Condition afin d'étudier la correspondance sur le champ LATEST_STATEMENT_DATE entre tbl_X et tbl_Y
+    Dim wsX As Worksheet
+    Dim wsY As Worksheet
+    Dim tableX As ListObject
+    Dim tableY As ListObject
+    Dim rngX As Range
+    Dim rngY As Range
+    Dim cellX As Range
+    Dim cellY As Range
+    Dim isDifferent As Boolean
+    
+    Set wsX = ThisWorkbook.Sheets("TEST_ARCHIVES")
+    Set wsY = ThisWorkbook.Sheets("TEST_DONNEES")
+    Set tableX = wsX.ListObjects("Tableau_X")
+    Set tableY = wsX.ListObjects("Tableau_Y")
+    
+    Set rngX = tableX.ListColumns("Latest Statement Date").DataBodyRange
+    Set rngY = tableY.ListColumns("Latest Statement Date").DataBodyRange
+    
+    isDifferent = False
+    For Each cellX In rngX
+        For Each cellY In rngY
+            If cellX.Value <> cellY.Value Then
+                isDifferent = True
+                'Ajouter un compteur ici
+                Exit For
+            End If
+        Next cellY
+        If isDifferent Then Exit For
+    Next cellX
+    
+    If isDiffferent Then
+        MsgBox "Il y a des modifs"
+    Else
+        MsgBox "RAS, données à jour"
+    End If
+
+    'Application.ScreenUpdating = True
+    
+End Sub
