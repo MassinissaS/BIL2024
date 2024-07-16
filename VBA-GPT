@@ -1,190 +1,66 @@
-Sub CalculerNoteMediane()
+Sub TriggersRatings()
 
-    Dim lastRow As Integer
-    Dim i As Integer
-    Dim notes(1 To 3) As String
-    Dim x As Integer
-    Dim y As Integer
-    Dim z As Integer
+    Dim derLB, derLR, i, j, lim_actu, lim_old As Integer
+    Dim rt_actu, rt_old As Integer
+        
+    derLB = Sheets("8BankFramework").Cells(Rows.Count, 3).End(xlUp).Row
+    derLR = ActiveSheet.Cells(Rows.Count, 3).End(xlUp).Row
     
-    ' Trouver la dernière ligne de données dans la colonne B
-    lastRow = Sheets("Table").Cells(Sheets("Table").Rows.Count, "B").End(xlUp).Row
-
-    ' Boucler à travers chaque ligne pour calculer la note médiane
-    For i = 3 To lastRow ' Commencer à 2 en supposant qu'il y a une ligne d'en-tête
-        notes(1) = Sheets("Table").Cells(i, 3).Value ' Notation Moody's
-        notes(2) = Sheets("Table").Cells(i, 4).Value ' Notation Fitch
-        notes(3) = Sheets("Table").Cells(i, 5).Value ' Notation S&P
+    Call EnleverTrigger
+    
+    For i = 4 To derLR
+        rt_actu = Sheets("6RatingsExternes").Cells(i, 12).Value
+        rt_old = Sheets("7ArchiveRatings").Cells(i, 12).Value
         
-        'Discuter à propos de CCC pour Fitch et D pour S&P
-        'Utiliser une fonction convertirNotation avec Case ?
-        If notes(1) = "AAA" Then
-            x = 22
-        ElseIf notes(1) = "AA1" Then
-            x = 21
-        ElseIf notes(1) = "AA2" Then
-            x = 20
-        ElseIf notes(1) = "AA3" Then
-            x = 19
-        ElseIf notes(1) = "A1" Then
-            x = 18
-        ElseIf notes(1) = "A2" Then
-            x = 17
-        ElseIf notes(1) = "A3" Then
-            x = 16
-        ElseIf notes(1) = "BAA1" Then
-            x = 15
-        ElseIf notes(1) = "BAA2" Then
-            x = 14
-        ElseIf notes(1) = "BAA3" Then
-            x = 13
-        ElseIf notes(1) = "BA1" Then
-            x = 12
-        ElseIf notes(1) = "BA2" Then
-            x = 11
-        ElseIf notes(1) = "BA3" Then
-            x = 10
-        ElseIf notes(1) = "B1" Then
-            x = 9
-        ElseIf notes(1) = "B2" Then
-            x = 8
-        ElseIf notes(1) = "B3" Then
-            x = 7
-        ElseIf notes(1) = "CAA" Then
-            x = 6
-        ElseIf notes(1) = "CA" Then
-            x = 5
-        ElseIf notes(1) = "C" Then
-            x = 4
+        If rt_actu <> rt_old Then
+            If Sheets("6RatingsExternes").Cells(i, 5).Value <> "-" Then
+                If Sheets("6RatingsExternes").Cells(i, 5).Value > 5000000000# Then
+                    If rt_actu <> "NR" Then
+                        For j = 4 To derLB
+                            
+                            If rt_actu = Sheets("8BankFramework").Cells(j, 3).Value Then
+                                lim_actu = Sheets("8BankFramework").Cells(j, 6).Value
+                            End If
+                            
+                            If rt_old = Sheets("8BankFramework").Cells(j, 3).Value Then
+                                lim_old = Sheets("8BankFramework").Cells(j, 6).Value
+                            End If
+                            
+                            'lim_actu < lim_old Trigger dur négatif rouge
+                            If lim_actu < lim_old Then
+                                Sheets("6RatingsExternes").Cells(i, 12).Interior.ColorIndex = 22
+                            ElseIf lim_actu > lim_old Then
+                                Sheets("6RatingsExternes").Cells(i, 12).Interior.ColorIndex = 43
+                            Else
+                                Sheets("6RatingsExternes").Cells(i, 12).Interior.ColorIndex = 43
+                            End If
+                        Next
+                    End If
+                ElseIf Sheets("6RatingsExternes").Cells(i, 5).Value < 5000000000# Then
+                    If rt_actu <> "NR" Then
+                        For j = 4 To derLB
+                            
+                            If rt_actu = Sheets("8BankFramework").Cells(j, 3).Value Then
+                                lim_actu = Sheets("8BankFramework").Cells(j, 6).Value
+                            End If
+                            
+                            If rt_old = Sheets("8BankFramework").Cells(j, 3).Value Then
+                                lim_old = Sheets("8BankFramework").Cells(j, 6).Value
+                            End If
+                            
+                            'lim_actu < lim_old Trigger dur négatif rouge
+                            If lim_actu < lim_old Then
+                                Sheets("6RatingsExternes").Cells(i, 12).Interior.ColorIndex = 22
+                            ElseIf lim_actu > lim_old Then
+                                Sheets("6RatingsExternes").Cells(i, 12).Interior.ColorIndex = 43
+                            Else
+                                Sheets("6RatingsExternes").Cells(i, 12).Interior.ColorIndex = 43
+                            End If
+                        Next
+                    End If
+                End If
+            End If
         End If
-        
-        If notes(2) = "AAA" Then
-            y = 22
-        ElseIf notes(2) = "AA+" Then
-            y = 21
-        ElseIf notes(2) = "AA" Then
-            y = 20
-        ElseIf notes(2) = "AA-" Then
-            y = 19
-        ElseIf notes(2) = "A+" Then
-            y = 18
-        ElseIf notes(2) = "A" Then
-            y = 17
-        ElseIf notes(2) = "A-" Then
-            y = 16
-        ElseIf notes(2) = "BBB+" Then
-            y = 15
-        ElseIf notes(2) = "BBB" Then
-            y = 14
-        ElseIf notes(2) = "BBB-" Then
-            y = 13
-        ElseIf notes(2) = "BB+" Then
-            y = 12
-        ElseIf notes(2) = "BB" Then
-            y = 11
-        ElseIf notes(2) = "BB-" Then
-            y = 10
-        ElseIf notes(2) = "B+" Then
-            y = 9
-        ElseIf notes(2) = "B" Then
-            y = 8
-        ElseIf notes(2) = "B-" Then
-            y = 7
-        ElseIf notes(2) = "CCC" Then
-            y = x
-        ElseIf notes(2) = "DDD" Then
-            y = 3
-        ElseIf notes(2) = "DD" Then
-            y = 2
-        ElseIf notes(2) = "D" Then
-            y = 1
-        End If
-        
-        If notes(3) = "AAA" Then
-            z = 22
-        ElseIf notes(3) = "AA+" Then
-            z = 21
-        ElseIf notes(3) = "AA" Then
-            z = 20
-        ElseIf notes(3) = "AA-" Then
-            z = 19
-        ElseIf notes(3) = "A+" Then
-            z = 18
-        ElseIf notes(3) = "A" Then
-            z = 17
-        ElseIf notes(3) = "A-" Then
-            z = 16
-        ElseIf notes(3) = "BBB+" Then
-            z = 15
-        ElseIf notes(3) = "BBB" Then
-            z = 14
-        ElseIf notes(3) = "BBB-" Then
-            z = 13
-        ElseIf notes(3) = "BB+" Then
-            z = 12
-        ElseIf notes(3) = "BB" Then
-            z = 11
-        ElseIf notes(3) = "BB-" Then
-            z = 10
-        ElseIf notes(3) = "B+" Then
-            z = 9
-        ElseIf notes(3) = "B" Then
-            z = 8
-        ElseIf notes(3) = "B-" Then
-            z = 7
-        ElseIf notes(3) = "CCC+" Then
-            z = 6
-        ElseIf notes(3) = "CCC" Then
-            z = 5
-        ElseIf notes(3) = "CCC-" Then
-            z = 4
-        ElseIf notes(3) = "D" Then
-            z = 3
-        End If
-        
-        ' Écrire la médiane dans la colonne E
-        Sheets("Table").Cells(i, 6).Value = ChiffreMilieu(x, y, z)
-        
-        'Traitement pour renvoyer la lettre à partir de chiffre milieu
-        
-    Next i
+    Next
     
 End Sub
-
-Function ChiffreMilieu(x As Integer, y As Integer, z As Integer) As Integer
-    
-    ' Déclaration des variables
-    Dim num1 As Integer
-    Dim num2 As Integer
-    Dim num3 As Integer
-    Dim temp As Integer
-
-    ' Initialisation des variables
-    num1 = x ' Remplacer par le premier nombre
-    num2 = y  ' Remplacer par le deuxième nombre
-    num3 = z ' Remplacer par le troisième nombre
-
-    ' Tri des nombres
-    If num1 > num2 Then
-        temp = num1
-        num1 = num2
-        num2 = temp
-    End If
-
-    If num2 > num3 Then
-        temp = num2
-        num2 = num3
-        num3 = temp
-    End If
-
-    If num1 > num2 Then
-        temp = num1
-        num1 = num2
-        num2 = temp
-    End If
-    
-    ChiffreMilieu = num2
-    
-End Function
-
-
