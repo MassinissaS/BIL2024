@@ -1,0 +1,27 @@
+Sub FindLatestDate()
+    Dim ws As Worksheet
+    Dim lastRow As Long
+    Dim latestDate As Date
+    Dim cell As Range
+
+    ' Set the worksheet
+    Set ws = ThisWorkbook.Sheets("Feuil1")
+
+    ' Find the last row with data in column C
+    lastRow = ws.Cells(ws.Rows.Count, 3).End(xlUp).Row
+
+    ' Initialize the latest date to the earliest possible date
+    latestDate = DateSerial(1900, 1, 1)
+
+    ' Loop through each cell in column C from row 4 to the last row
+    For Each cell In ws.Range("C4:C" & lastRow)
+        If IsDate(cell.Value) Then
+            If cell.Value > latestDate Then
+                latestDate = cell.Value
+            End If
+        End If
+    Next cell
+
+    ' Display the latest date in a message box
+    MsgBox "La date la plus récente dans la colonne C est : " & latestDate
+End Sub
