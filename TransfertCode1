@@ -1,11 +1,28 @@
-Function SheetExists(wsName As String) As Boolean
-    Dim ws As Worksheet
-    On Error Resume Next
-    Set ws = ThisWorkbook.Sheets(wsName)
-    On Error GoTo 0
-    If ws Is Nothing Then
-        SheetExists = False
-    Else
-        SheetExists = True
-    End If
-End Function
+Sub CopierOngletDansAutreFichier()
+    Dim sourceWorkbook As Workbook
+    Dim destinationWorkbook As Workbook
+    Dim sheetToCopy As Worksheet
+    Dim destinationPath As String
+    Dim destinationFileName As String
+    
+    ' Spécifiez le chemin du répertoire et le nom du fichier de destination
+    destinationPath = "C:\chemin\vers\repertoire\"  ' Changez ceci pour le chemin de votre répertoire
+    destinationFileName = "NomDuFichierDestination.xlsx"  ' Changez ceci pour le nom de votre fichier de destination
+
+    ' Ouvrir le classeur de destination
+    Set destinationWorkbook = Workbooks.Open(destinationPath & destinationFileName)
+
+    ' Référencez le classeur source et la feuille à copier
+    Set sourceWorkbook = ThisWorkbook  ' Assumant que le code est exécuté à partir du classeur source
+    Set sheetToCopy = sourceWorkbook.Sheets("NomDeLaFeuille")  ' Changez ceci pour le nom de la feuille à copier
+
+    ' Copier la feuille dans le classeur de destination
+    sheetToCopy.Copy After:=destinationWorkbook.Sheets(destinationWorkbook.Sheets.Count)
+
+    ' Sauvegarder et fermer le classeur de destination
+    destinationWorkbook.Save
+    destinationWorkbook.Close
+
+    ' Message de confirmation
+    MsgBox "La feuille a été copiée avec succès dans " & destinationFileName
+End Sub
