@@ -1,11 +1,10 @@
-Function FeuilleExiste(Nom As String) As Boolean
-    
-    Dim sh As Object
- 
-    For Each sh In Sheets
-        If UCase(sh.Name) = UCase(Nom) Then
+Function FeuilleExiste(ws As Worksheet, wb As Workbook) As Boolean
+    Dim sh As Worksheet
+
+    For Each sh In wb.Sheets
+        If sh.Name = ws.Name Then
             FeuilleExiste = True
             Exit For
         End If
-    Next
+    Next sh
 End Function
