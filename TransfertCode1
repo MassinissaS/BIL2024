@@ -1,16 +1,43 @@
-Sub SupprimerBoutons()
-    Dim ws As Worksheet
-    Dim shp As Shape
+Sub ArchivageOnglet()
+    
+    Dim sourceWorkbook As Workbook
+    Dim destinationWorkbook As Workbook
+    Dim sheetToCopy As Worksheet
+    Dim destinationPath As String
+    Dim destinationFileName As String
+    Dim latest_date_old As Date
+    Dim copiedSheet As Worksheet
+    
+    latest_date_old = LatestDate(ThisWorkbook.Sheets("1.5Passage"))
+    latest_date_format = Format(latest_date_old, "yyyy-mm-dd")
+    
+    'Prendre en compte le changement de mois pour créer nouveau fichier ??????????
+    
+    ' Spécifiez le chemin du répertoire et le nom du fichier de destination
+    destinationPath = "H:\Outils\Archives-Souverains-CDS\"
+    destinationFileName = "Archives-Souverains-CDS-Aout-24.xlsx"
+    
+    ' Ouvrir le classeur de destination
+    Set destinationWorkbook = Workbooks.Open(destinationPath & destinationFileName)
 
-    ' Définir la feuille spécifiée
-    Set ws = ThisWorkbook.Sheets("NomDeLaFeuille") ' Remplacez "NomDeLaFeuille" par le nom de votre feuille
+    ' Référencez le classeur source et la feuille à copier
+    Set sourceWorkbook = ThisWorkbook  ' Assumant que le code est exécuté à partir du classeur source
+    Set sheetToCopy = sourceWorkbook.Sheets("1.5Passage")  ' Changez ceci pour le nom de la feuille à copier
 
-    ' Parcourir toutes les formes de la feuille et supprimer les boutons
-    For Each shp In ws.Shapes
-        If shp.Type = msoFormControl Then
-            If shp.FormControlType = xlButtonControl Then
-                shp.Delete
-            End If
-        End If
-    Next shp
+    ' Copier la feuille dans le classeur de destination
+    sheetToCopy.Copy After:=destinationWorkbook.Sheets(destinationWorkbook.Sheets.Count)
+    
+    'Vérifier si un onglet avec le même nom n'existe pas déjà ????????
+        
+    'Remplacer le nom de la feuille par la date des CDS
+    Set copiedSheet = destinationWorkbook.Sheets(destinationWorkbook.Sheets.Count)
+    copiedSheet.Name = latest_date_format
+    
+    ' Sauvegarder et fermer le classeur de destination
+    destinationWorkbook.Save
+    destinationWorkbook.Close
+
+    ' Message de confirmation - à supprimer après la phase de teste
+    MsgBox "La feuille a été copiée avec succès dans " & destinationFileName
+    
 End Sub
