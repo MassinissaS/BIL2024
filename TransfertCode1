@@ -1,10 +1,16 @@
-Function FeuilleExiste(ws As Worksheet, wb As Workbook) As Boolean
-    Dim sh As Worksheet
+Sub SupprimerBoutons()
+    Dim ws As Worksheet
+    Dim shp As Shape
 
-    For Each sh In wb.Sheets
-        If sh.Name = ws.Name Then
-            FeuilleExiste = True
-            Exit For
+    ' Définir la feuille spécifiée
+    Set ws = ThisWorkbook.Sheets("NomDeLaFeuille") ' Remplacez "NomDeLaFeuille" par le nom de votre feuille
+
+    ' Parcourir toutes les formes de la feuille et supprimer les boutons
+    For Each shp In ws.Shapes
+        If shp.Type = msoFormControl Then
+            If shp.FormControlType = xlButtonControl Then
+                shp.Delete
+            End If
         End If
-    Next sh
-End Function
+    Next shp
+End Sub
