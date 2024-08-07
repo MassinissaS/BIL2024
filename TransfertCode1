@@ -7,18 +7,36 @@ Sub ArchivageOnglet()
     Dim destinationFileName As String
     Dim latest_date_old As Date
     Dim copiedSheet As Worksheet
+    Dim latest_date_format As String
+    Dim monthName As String
+    Dim yearName As String
+    Dim fileExists As Boolean
     
     latest_date_old = LatestDate(ThisWorkbook.Sheets("1.5Passage"))
     latest_date_format = Format(latest_date_old, "yyyy-mm-dd")
     
-    'Prendre en compte le changement de mois pour créer nouveau fichier ??????????
+    ' Obtenir le nom du mois et de l'année
+    monthName = Format(latest_date_old, "mmmm")
+    yearName = Format(latest_date_old, "yy")
     
     ' Spécifiez le chemin du répertoire et le nom du fichier de destination
     destinationPath = "H:\Outils\Archives-Souverains-CDS\"
-    destinationFileName = "Archives-Souverains-CDS-Aout-24.xlsx"
+    destinationFileName = "Archives-Souverains-CDS-" & monthName & "-" & yearName & ".xlsx"
     
-    ' Ouvrir le classeur de destination
-    Set destinationWorkbook = Workbooks.Open(destinationPath & destinationFileName)
+    ' Vérifier si le fichier existe
+    If Dir(destinationPath & destinationFileName) <> "" Then
+        fileExists = True
+    Else
+        fileExists = False
+    End If
+    
+    ' Ouvrir le classeur de destination ou le créer s'il n'existe pas
+    If fileExists Then
+        Set destinationWorkbook = Workbooks.Open(destinationPath & destinationFileName)
+    Else
+        Set destinationWorkbook = Workbooks.Add
+        destinationWorkbook.SaveAs Filename:=destinationPath & destinationFileName
+    End If
 
     ' Référencez le classeur source et la feuille à copier
     Set sourceWorkbook = ThisWorkbook  ' Assumant que le code est exécuté à partir du classeur source
@@ -27,9 +45,18 @@ Sub ArchivageOnglet()
     ' Copier la feuille dans le classeur de destination
     sheetToCopy.Copy After:=destinationWorkbook.Sheets(destinationWorkbook.Sheets.Count)
     
-    'Vérifier si un onglet avec le même nom n'existe pas déjà ????????
-        
-    'Remplacer le nom de la feuille par la date des CDS
+    ' Vérifier si un onglet avec le même nom n'existe pas déjà
+    On Error Resume Next
+    Set copiedSheet = destinationWorkbook.Sheets(latest_date_format)
+    On Error GoTo 0
+    
+    If Not copiedSheet Is Nothing Then
+        MsgBox "Un onglet avec le même nom existe déjà.", vbExclamation
+        destinationWorkbook.Close SaveChanges:=False
+        Exit Sub
+    End If
+    
+    ' Remplacer le nom de la feuille par la date des CDS
     Set copiedSheet = destinationWorkbook.Sheets(destinationWorkbook.Sheets.Count)
     copiedSheet.Name = latest_date_format
     
@@ -37,7 +64,7 @@ Sub ArchivageOnglet()
     destinationWorkbook.Save
     destinationWorkbook.Close
 
-    ' Message de confirmation - à supprimer après la phase de teste
+    ' Message de confirmation - à supprimer après la phase de test
     MsgBox "La feuille a été copiée avec succès dans " & destinationFileName
     
 End Sub
