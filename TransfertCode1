@@ -1,15 +1,101 @@
-Sub SauvegarderEtFermerClasseur()
-    ' Sauvegarder le classeur
-    ThisWorkbook.Save
+Sub CompterTrigger()
+
+    'Ajouter
     
-    ' Fermer le classeur après 10 secondes
-    Application.OnTime Now + TimeValue("00:00:10"), "FermerClasseur"
+    Dim j, k As Integer
+    Dim derniereUpdate As String
+    Dim nb_trigger As Integer
+    Dim liste_trigger_old As String
+    Dim liste_trigger As String
+    Dim derniereL As Integer
+    Dim derniereLR As Integer
+    Dim latest_date_actu As Date
+    Dim latest_date_format As String
+    Dim monthName As String
+    Dim yearName As String
+    Dim dayName As String
+    
+    latest_date_actu = LatestDate(ThisWorkbook.Sheets("1Données"))
+    latest_date_format = Format(latest_date_old, "yyyy-mm-dd")
+    
+    dayName = Format(latest_date_old, "dd")
+    monthName = Format(latest_date_old, "mm")
+    yearName = Format(latest_date_old, "yyyy")
+    
+    derniereL = Sheets("1Données").Cells(Rows.Count, 3).End(xlUp).Row
+    derniereLR = Sheets("3Review").Cells(Rows.Count, 3).End(xlUp).Row
+
+    derniereUpdate = Format(Now(), "dd.mm.yyyy h:mm AM/PM")
+    
+    With Sheets("3Review").Range("A1")
+        .Value = "Dernière actualisation le : " & derniereUpdate
+        .Interior.Color = RGB(165, 165, 165)
+        .BorderAround _
+            ColorIndex:=1, Weight:=xlMedium
+        .Font.Bold = True
+        .HorizontalAlignment = xlCenter
+        .Font.Size = 9
+    End With
+     
+    Sheets("3Review").Range("C2").Value = "Liste des triggers activés à la date du " & latest_date_format
+    Sheets("3Review").Range("C2").Interior.Color = RGB(165, 165, 165)
+    Sheets("3Review").Range("C2").BorderAround _
+        ColorIndex:=1, Weight:=xlMedium
+    Sheets("3Review").Range("C2").HorizontalAlignment = xlCenter
+    Sheets("3Review").Range("C2").Font.Bold = True
+     
+    Sheets("3Review").Range("C3").Value = "Company Name"
+    Sheets("3Review").Range("C3").Interior.Color = RGB(165, 165, 165)
+    Sheets("3Review").Range("C3").BorderAround _
+        ColorIndex:=1, Weight:=xlMedium
+    Sheets("3Review").Range("C3").HorizontalAlignment = xlCenter
+    Sheets("3Review").Range("C3").Font.Bold = True
+     
+    Sheets("3Review").Range("D3").Value = "Détails des triggers activés"
+    Sheets("3Review").Range("D3").Interior.Color = RGB(165, 165, 165)
+    Sheets("3Review").Range("D3").BorderAround _
+        ColorIndex:=1, Weight:=xlMedium
+    Sheets("3Review").Range("D3").HorizontalAlignment = xlCenter
+    Sheets("3Review").Range("D3").Font.Bold = True
+     
+    Sheets("3Review").Range("E3").Value = "Nombre de triggers"
+    Sheets("3Review").Range("E3").Interior.Color = RGB(165, 165, 165)
+    Sheets("3Review").Range("E3").BorderAround _
+        ColorIndex:=1, Weight:=xlMedium
+    Sheets("3Review").Range("E3").HorizontalAlignment = xlCenter
+    Sheets("3Review").Range("E3").Font.Bold = True
+    
+    For j = 4 To derniereL
+        For k = 4 To derniereLR
+            If Sheets("3Review").Cells(k, 3).Value = Sheets("3Review").Cells(j, 3).Value Then
+                liste_trigger_old = Sheets("3Review").Cells(j, 4).Value
+                liste_trigger = liste_trigger_old
+                Sheets("3Review").Cells(j, 4).WrapText = True
+                
+                If Sheets("1Données").Cells(j, 19).Interior.ColorIndex = 22 Then
+                        If liste_trigger_old <> " " Then
+                            liste_trigger = liste_trigger_old & Chr(13) & Chr(10) & "Négatif : " & Sheets("1Données").Cells(j, 17).Value & ", " & Sheets("1Données").Cells(j, 20).Value & ", " & Sheets("1Données").Cells(j, 22).Value & " le " & latest_date_format & " ; "
+                        ElseIf liste_trigger_old = " " Then
+                            liste_trigger = "Négatif : " & Sheets("1Données").Cells(j, 17).Value & ", " & Sheets("1Données").Cells(j, 20).Value & ", " & Sheets("1Données").Cells(j, 22).Value & " le " & latest_date_format & " ; "
+                        End If
+                End If
+                
+                If Sheets("1Données").Cells(j, 19).Interior.ColorIndex = 50 Then
+                        If liste_trigger_old <> " " Then
+                            liste_trigger = liste_trigger_old & Chr(13) & Chr(10) & "Positif : " & Sheets("1Données").Cells(j, 17).Value & ", " & Sheets("1Données").Cells(j, 20).Value & ", " & Sheets("1Données").Cells(j, 22).Value & " le " & latest_date_format & " ; "
+                        ElseIf liste_trigger_old = " " Then
+                            liste_trigger = "Positif : " & Sheets("1Données").Cells(j, 17).Value & ", " & Sheets("1Données").Cells(j, 20).Value & ", " & Sheets("1Données").Cells(j, 22).Value & " le " & latest_date_format & " ; "
+                        End If
+                End If
+                
+                Sheets("3Review").Cells(j, 4).Value = liste_trigger
+            End If
+        Next
+    Next
+    
+    Call TriTableauTriggers
+        
+    Sheets("3Review").Columns("C:I").AutoFit
+    Sheets("3Review").Activate
 
 End Sub
-
-Sub FermerClasseur()
-
-    ThisWorkbook.Close SaveChanges:=False
-
-End Sub
-
