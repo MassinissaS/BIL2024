@@ -1,1 +1,32 @@
-=INDEX(Z:Z,MATCH(O4,AD:AD,0))
+Sub IndexMatchVBA()
+    Dim ws As Worksheet
+    Dim i As Long
+    Dim searchValue As Variant
+    Dim result As Variant
+    
+    ' Définir la feuille de calcul où se trouvent les données
+    Set ws = ThisWorkbook.Sheets("Feuil1") ' Remplacez "Feuil1" par le nom de votre feuille de calcul
+
+    ' Boucler à travers chaque ligne de 4 à 181
+    For i = 4 To 181
+        ' Lire la valeur de la colonne O à la ligne i
+        searchValue = ws.Cells(i, "O").Value
+        
+        ' Utiliser la fonction Application.Match pour trouver la ligne correspondante dans la colonne AD
+        On Error Resume Next
+        Dim matchRow As Variant
+        matchRow = Application.Match(searchValue, ws.Range("AD:AD"), 0)
+        On Error GoTo 0
+        
+        If Not IsError(matchRow) Then
+            ' Si une correspondance est trouvée, utiliser la valeur dans la colonne Z à la ligne trouvée
+            result = ws.Cells(matchRow, "Z").Value
+            
+            ' Stocker le résultat dans la cellule correspondante (par exemple, dans la colonne P à la ligne i)
+            ws.Cells(i, "P").Value = result
+        Else
+            ' Si aucune correspondance n'est trouvée, mettre une valeur par défaut ou laisser vide
+            ws.Cells(i, "P").Value = "Non trouvé"
+        End If
+    Next i
+End Sub
