@@ -1,32 +1,31 @@
-Sub IndexMatchVBA()
-    Dim ws As Worksheet
-    Dim i As Long
-    Dim searchValue As Variant
-    Dim result As Variant
-    
-    ' Définir la feuille de calcul où se trouvent les données
-    Set ws = ThisWorkbook.Sheets("Feuil1") ' Remplacez "Feuil1" par le nom de votre feuille de calcul
+Sub Boucle_b()
 
-    ' Boucler à travers chaque ligne de 4 à 181
-    For i = 4 To 181
-        ' Lire la valeur de la colonne O à la ligne i
-        searchValue = ws.Cells(i, "O").Value
+    Dim derniereL_DVd As Integer
+    Dim k As Integer
+    
+    Sheets("0DataValidation").Cells(Rows.Count, 4).End(xlUp).Row
+    
+    Sheets("0DataValidation").Range("N3").Value = "Fitch ID 2"
+    Sheets("0DataValidation").Range("O3").Value = "Lookup"
+    Sheets("0DataValidation").Range("P3").Value = "Primary"
         
+    For k = 4 To derniereL_DVd
+        Sheets("0DataValidation").Cells(k, 14) = Sheets("0DataValidation").Cells(k, 3)
+        Sheets("0DataValidation").Cells(k, 15) = Sheets("0DataValidation").Cells(k, 3) & Sheets("0DataValidation").Cells(k, 7) & Sheets("0DataValidation").Cells(k, 8)
+        searchValue = Sheets("0DataValidation").Cells(k, "O").Value
         ' Utiliser la fonction Application.Match pour trouver la ligne correspondante dans la colonne AD
         On Error Resume Next
-        Dim matchRow As Variant
-        matchRow = Application.Match(searchValue, ws.Range("AD:AD"), 0)
+        matchRow = Application.Match(searchValue, Sheets("0DataValidation").Range("AD:AD"), 0)
         On Error GoTo 0
-        
         If Not IsError(matchRow) Then
             ' Si une correspondance est trouvée, utiliser la valeur dans la colonne Z à la ligne trouvée
-            result = ws.Cells(matchRow, "Z").Value
-            
+            result = Sheets("0DataValidation").Cells(matchRow, "Z").Value
             ' Stocker le résultat dans la cellule correspondante (par exemple, dans la colonne P à la ligne i)
-            ws.Cells(i, "P").Value = result
+            Sheets("0DataValidation").Cells(k, "P").Value = result
         Else
             ' Si aucune correspondance n'est trouvée, mettre une valeur par défaut ou laisser vide
-            ws.Cells(i, "P").Value = "Non trouvé"
+            Sheets("0DataValidation").Cells(k, "P").Value = "Non trouvé"
         End If
-    Next i
+    Next
+
 End Sub
