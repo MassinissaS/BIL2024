@@ -1,103 +1,37 @@
-Sub Parametrage()
+Sub ApplyIndexMatchFormula()
+
+    Dim wsSource As Worksheet
+    Dim wsTarget As Worksheet
+    Dim i As Long
+    Dim searchValue As String
+    Dim matchRow As Variant
+    Dim result As Variant
     
-    Dim rng As Range
-    Dim dlm As String
-    Dim result As String
-    Dim derniereL As Integer
-    Dim derniereL_DV As Integer
-    Dim j As Integer
+    ' Définir les feuilles de calcul source et cible
+    Set wsSource = ThisWorkbook.Sheets("0DataValidation")
+    Set wsTarget = ThisWorkbook.Sheets("0Source") ' Remplacez "0Source" si vous appliquez cela sur une autre feuille
     
-    derniereL = Sheets("0Source").Cells(Rows.Count, 4).End(xlUp).Row
-    derniereL_DV = Sheets("0DataValidation").Cells(Rows.Count, 4).End(xlUp).Row
-    
-    Sheets("0DataValidation").Range("A4:AD" & derniereL + 10).ClearContents
-    Sheets("0DataValidation").Range("B3:P" & derniereL_DV).ClearContents
-    
-    Sheets("0DataValidation").Range("AD3").Value = "Lookup"
-    
-    ' Définir la plage de cellules
-    Set rng = ThisWorkbook.Sheets("0Source").Range("D4:D" & derniereL)
-    
-    ' Définir le délimiteur (espace dans ce cas)
-    dlm = ","
-    
-    ' Appeler la fonction personnalisée TextJoinRange pour faire le join
-    result = TextJoinRange(dlm, rng)
-    
-    Sheets("0Paramètres").Cells(2, 3).Value = "startDate:2021-06-30"
-    Sheets("0Paramètres").Cells(3, 3).Value = "endDate:2029-12-31"
-    Sheets("0Paramètres").Cells(4, 3).Value = "fitchId:" & result
-    Sheets("0Paramètres").Cells(5, 3).Value = "periodType:Annual"
-    Sheets("0Paramètres").Cells(6, 3).Value = "entity.id:" & result
-    Sheets("0Paramètres").Cells(7, 3).Value = "primary:TRUE"
-    
-    Sheets("0DataValidation").Range("T3").FormulaArray = _
-        "=FC.List(""FC_NICKNAMES"",'0Paramètres'!C6:C7,TRUE)"
+    ' Boucle sur les lignes 4 à 181
+    For i = 4 To 181
         
-    Application.OnTime Now + TimeValue("00:00:06"), "ThisWorkbook.Boucle"
-    
-    Sheets("0DataValidation").Range("B3").FormulaArray = _
-        "=FC.List(""FC_STATEMENTS_H"",'0Paramètres'!C2:C5,TRUE,)"
+        ' Construire la valeur de recherche (valeur de la colonne B + "TRUE")
+        searchValue = wsTarget.Cells(i, 2).Value & "TRUE" ' Colonne B correspond à la colonne 2
         
-    Application.OnTime Now + TimeValue("00:00:20"), "ThisWorkbook.Boucle_b"
-    
-
-End Sub
-
-Sub Boucle()
-
-    Dim derniereL As Integer
-    Dim j As Integer
-    
-    derniereL = Sheets("0Source").Cells(Rows.Count, 4).End(xlUp).Row
-
-    For j = 4 To derniereL
-        If Sheets("0DataValidation").Cells(j, 26) = "true" Then
-            Sheets("0DataValidation").Cells(j, 30) = Sheets("0DataValidation").Cells(j, 20) & Sheets("0DataValidation").Cells(j, 23) & Sheets("0DataValidation").Cells(j, 24)
-        Else
-            Sheets("0DataValidation").Cells(j, 30) = " "
-        End If
-    Next
-
-End Sub
-
-Sub Boucle_b()
-
-    Dim derniereL_DVd As Integer
-    Dim k As Integer
-    
-    derniereL_DVd = Sheets("0DataValidation").Cells(Rows.Count, 4).End(xlUp).Row
-    
-    With Sheets("0DataValidation")
-        .Range("A3").Value = "Lookup"
-        .Range("N3").Value = "Fitch ID 2"
-        .Range("O3").Value = "Lookup"
-        .Range("P3").Value = "Primary"
-    End With
-        
-    For k = 4 To derniereL_DVd
-        Sheets("0DataValidation").Cells(k, 14) = Sheets("0DataValidation").Cells(k, 3)
-        Sheets("0DataValidation").Cells(k, 15) = Sheets("0DataValidation").Cells(k, 3) & Sheets("0DataValidation").Cells(k, 7) & Sheets("0DataValidation").Cells(k, 8)
-        searchValue = Sheets("0DataValidation").Cells(k, "O").Value
-        ' Utiliser la fonction Application.Match pour trouver la ligne correspondante dans la colonne AD
+        ' Trouver la ligne correspondant à searchValue dans la colonne A de '0DataValidation'
         On Error Resume Next
-        matchRow = Application.Match(searchValue, Sheets("0DataValidation").Range("AD:AD"), 0)
+        matchRow = Application.Match(searchValue, wsSource.Range("A:A"), 0)
         On Error GoTo 0
         
+        ' Si une correspondance est trouvée, récupérer la valeur correspondante de la colonne F
         If Not IsError(matchRow) Then
-            ' Si une correspondance est trouvée, utiliser la valeur dans la colonne Z à la ligne trouvée
-            result = Sheets("0DataValidation").Cells(matchRow, "Z").Value
-            ' Stocker le résultat dans la cellule correspondante (par exemple, dans la colonne P à la ligne i)
-            Sheets("0DataValidation").Cells(k, "P").Value = result
+            result = wsSource.Cells(matchRow, 6).Value ' Colonne F correspond à la colonne 6
         Else
-            ' Si aucune correspondance n'est trouvée, mettre une valeur par défaut ou laisser vide
-            Sheets("0DataValidation").Cells(k, "P").Value = "Non trouvé"
+            result = "Non trouvé"
         End If
         
-        If Sheets("0DataValidation").Cells(k, "P").Value <> "Non trouvé" Then
-            Sheets("0DataValidation").Cells(k, "A").Value = Sheets("0DataValidation").Cells(k, "A").Value & Sheets("0DataValidation").Cells(k, "P").Value
-        End If
-        
-    Next
+        ' Stocker le résultat dans la colonne de votre choix, par exemple, la colonne G
+        wsTarget.Cells(i, 7).Value = result ' Colonne G correspond à la colonne 7
+
+    Next i
 
 End Sub
