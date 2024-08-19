@@ -1,21 +1,36 @@
-Priorité Urgente : à finaliser avant le lundi 19 à 11h 
-•	Vérifier le code qui fait le récap du CDS sur Banque-CDS et Souverains-CDS. Actuellement le code supprime les triggers précédents (exemple : Panama)
-•	Faire le récap ratings sur Banques-Ratings à partir du code récap amélioré du CDS
-•	Vérifier le bon fonctionnement du fichier Banques-Ratings
-•	Faire l’archive automatique pour Banques-Ratios (fichier annuel, onglet trimestriel), Banques-Ratings (fichier annuel, onglet mensuel), et mettre quelques archives dans Archives-Souverains-Global
-•	Régler le souci de l’en-tête Souverain-Global en mettant le nom du champ & date récupéré du fichier source
+Sub ProcessData()
+    For j = 4 To derniereL
+        For k = 4 To derniereLR
+            If Sheets("1Données").Cells(j, 4).Value = Sheets("3Récapitulatif").Cells(k, 3).Value Then
+                MsgBox Sheets("1Données").Cells(j, 4).Value 'TEST
+                nb_trigger = 0
+                liste_trigger = ""
+                liste_trigger_old = Sheets("3Récapitulatif").Cells(k, 4).Value
+                MsgBox liste_trigger_old 'TEST
+                Sheets("3Récapitulatif").Cells(k, 4).WrapText = True
+                Sheets("3Récapitulatif").Cells(k, 4).ClearContents
+                If Sheets("1Données").Cells(j, 19).Interior.ColorIndex = 22 Then
+                    MsgBox Sheets("1Données").Cells(j, 4).Value 'TEST
+                    liste_trigger = "Négatif : Passage de " & Sheets("2Archive").Cells(j, 13).Value & " (limite à " & Sheets("2Archive").Cells(j, 14).Value & " EURm) à " & Sheets("1Données").Cells(j, 13).Value & " (limite à " & Sheets("1Données").Cells(j, 14).Value & " EURm) ; "
+                ElseIf Sheets("1Données").Cells(j, 19).Interior.Color = RGB(169, 208, 142) Then
+                    MsgBox Sheets("1Données").Cells(j, 4).Value 'TEST
+                    liste_trigger = "Positif : Passage de " & Sheets("2Archive").Cells(j, 13).Value & " (limite à " & Sheets("2Archive").Cells(j, 14).Value & " EURm) à " & Sheets("1Données").Cells(j, 13).Value & " (limite à " & Sheets("1Données").Cells(j, 14).Value & " EURm) ; "
+                Else
+                    liste_trigger = liste_trigger_old
+                End If
+                
+                If InStr(1, liste_trigger_old, liste_trigger) = 0 Then
+                    liste_trigger = liste_trigger_old & Chr(13) & Chr(10) & liste_trigger
+                End If
+                
+                nb_trigger = Len(liste_trigger) - Len(Replace(liste_trigger, "N", ""))
+                Sheets("3Récapitulatif").Cells(k, 4).Value = liste_trigger
+                Sheets("3Récapitulatif").Cells(k, 5).Value = nb_trigger
+            End If
+        Next k
+    Next j
 
-Priorité moyenne : à finaliser avant la réunion avec Rémi mardi 20
-•	Faire toute une batterie de tests sur tous les fichiers lundi soir
-•	Mettre les boutons et les interfaces en anglais
-•	Ajouter les remarques du fichier Banques-Ratios-Format (WrapText, couleurs, séparateurs de décimales etc.)
-•	Modifier les champs des ListBox pour l’ensemble des boutons pour le Banques-Details
-•	Remplacer la ListBox Date pour le Banques-Details par une SearchBox
-•	Régler le souci lié au chemin du fichier Archive pour les fichiers CDS (désigner le chemin par CCA: plutôt que par Z: ou H: )
-•	Faire un bouton run unique pour chaque fichier, et veiller à choisir un temps adapté entre chaque étape. Garder les boutons des étapes intermédiaires néanmoins
-
-Priorité faible : à finaliser avant la fin de la semaine
-•	Harmoniser les onglets Source de tous les fichiers (en rajoutant les colonnes traitement spécifique, dernière revue etc.)
-•	Faire disparaître les codes FC de tous les fichiers et faire en sorte que l’onglet Source téléverse les champs à chaque fois
-•	Freeze les 2 deux premières colonnes au fur et à mesure qu’on scroll à droite
-•	Mieux gérer le EnleverTriggers sur chacun des fichiers. Les triggers doivent être conservés après la fermeture des fichiers.
+    With Sheets("3Récapitulatif")
+        .Columns("C:I").AutoFit
+    End With
+End Sub
