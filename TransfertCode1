@@ -1,37 +1,50 @@
     For j = 4 To derniereL
         For k = 4 To derniereLR
-            If Sheets("3Review").Cells(j, 3).Value = Sheets("3Review").Cells(k, 3).Value Then
+            If Sheets("1Données").Cells(j, 4).Value = Sheets("3Récapitulatif").Cells(k, 3).Value Then
+                MsgBox Sheets("1Données").Cells(j, 4).Value 'TEST
                 nb_trigger = 0
                 liste_trigger = ""
-                liste_trigger_old = Sheets("3Review").Cells(j, 4).Value
-                Sheets("3Review").Cells(j, 4).WrapText = True
-                Sheets("3Review").Cells(j, 4).ClearContents
+                liste_trigger_old = Sheets("3Récapitulatif").Cells(j, 4).Value
+                MsgBox liste_trigger_old 'TEST
+                Sheets("3Récapitulatif").Cells(j, 4).WrapText = True
+                Sheets("3Récapitulatif").Cells(j, 4).ClearContents
                 If Sheets("1Données").Cells(j, 19).Interior.ColorIndex = 22 Then
-                    If liste_trigger_old <> "" Then
-                        liste_trigger = "Négatif : " & Sheets("1Données").Cells(j, 17).Value & ", " & Sheets("1Données").Cells(j, 20).Value & ", " & Sheets("1Données").Cells(j, 22).Value & " le " & latest_date_format & " ; "
-                        'On  vérifie que le trigger activé n'existe pas déjà dans la liste avant de l'ajouter
+                MsgBox Sheets("1Données").Cells(j, 4).Value 'TEST
+                    If liste_trigger_old <> "" Then ' AJOUTER LA DATE DANS CHACUNE DES  LIGNES !!!!!!!!!!!!!!!!!!!!!!!!
+                        MsgBox Sheets("1Données").Cells(j, 4).Value 'TEST
+                        liste_trigger = "Négatif : Passage de " & Sheets("2Archive").Cells(j, 13).Value & " (limite à " & Sheets("2Archive").Cells(j, 14).Value & "EURm) à " & Sheets("1Données").Cells(j, 13).Value & " (limite à " & Sheets("1Données").Cells(j, 14).Value & "EURm) ; "
                         If InStr(1, liste_trigger_old, liste_trigger) = 0 Then
                             liste_trigger = liste_trigger_old & Chr(13) & Chr(10) & liste_trigger
                         End If
-                    ElseIf liste_trigger_old = " " Then
-                        liste_trigger = "Négatif : " & Sheets("1Données").Cells(j, 17).Value & ", " & Sheets("1Données").Cells(j, 20).Value & ", " & Sheets("1Données").Cells(j, 22).Value & " le " & latest_date_format & " ; "
+                    ElseIf liste_trigger_old = "" Then
+                        MsgBox Sheets("1Données").Cells(j, 4).Value 'TEST
+                        liste_trigger = "Négatif : Passage de " & Sheets("2Archive").Cells(j, 13).Value & " (limite à " & Sheets("2Archive").Cells(j, 14).Value & "EURm) à " & Sheets("1Données").Cells(j, 13).Value & " (limite à " & Sheets("1Données").Cells(j, 14).Value & "EURm) ; "
                     End If
                 ElseIf Sheets("1Données").Cells(j, 19).Interior.Color = RGB(169, 208, 142) Then
+                    MsgBox Sheets("1Données").Cells(j, 4).Value 'TEST
                     If liste_trigger_old <> "" Then
-                        liste_trigger = "Positif : " & Sheets("1Données").Cells(j, 17).Value & ", " & Sheets("1Données").Cells(j, 20).Value & ", " & Sheets("1Données").Cells(j, 22).Value & " le " & latest_date_format & " ; "
+                    MsgBox Sheets("1Données").Cells(j, 4).Value 'TEST
+                        liste_trigger = "Positif : Passage de " & Sheets("2Archive").Cells(j, 13).Value & " (limite à " & Sheets("2Archive").Cells(j, 14).Value & "EURm) à " & Sheets("1Données").Cells(j, 13).Value & " (limite à " & Sheets("1Données").Cells(j, 14).Value & "EURm) ; "
                         'On  vérifie que le trigger activé n'existe pas déjà dans la liste avant de l'ajouter
                         If InStr(1, liste_trigger_old, liste_trigger) = 0 Then
                             liste_trigger = liste_trigger_old & Chr(13) & Chr(10) & liste_trigger
                         End If
                     ElseIf liste_trigger_old = "" Then
-                        liste_trigger = "Positif : " & Sheets("1Données").Cells(j, 17).Value & ", " & Sheets("1Données").Cells(j, 20).Value & ", " & Sheets("1Données").Cells(j, 22).Value & " le " & latest_date_format & " ; "
+                        MsgBox Sheets("1Données").Cells(j, 4).Value 'TEST
+                        liste_trigger = "Positif : Passage de " & Sheets("2Archive").Cells(j, 13).Value & " (limite à " & Sheets("2Archive").Cells(j, 14).Value & "EURm) à " & Sheets("1Données").Cells(j, 13).Value & " (limite à " & Sheets("1Données").Cells(j, 14).Value & "EURm) ; "
                     End If
                 Else
                     liste_trigger = liste_trigger_old
+                    MsgBox Sheets("1Données").Cells(j, 4).Value
                 End If
                 nb_trigger = Len(liste_trigger) - Len(Replace(liste_trigger, "N", ""))
-                Sheets("3Review").Cells(j, 4).Value = liste_trigger
-                Sheets("3Review").Cells(j, 5).Value = nb_trigger
+                Sheets("3Récapitulatif").Cells(j, 4).Value = liste_trigger
+                Sheets("3Récapitulatif").Cells(j, 5).Value = nb_trigger
             End If
         Next
     Next
+        
+    Sheets("3Récapitulatif").Columns("C:I").AutoFit
+    Sheets("3Récapitulatif").Activate
+
+End Sub
