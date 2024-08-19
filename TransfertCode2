@@ -1,5 +1,119 @@
-            If InStr(ActiveSheet.Cells(3, j).Value, Chr(10)) > 0 Then
-                firstLine = Left(ActiveSheet.Cells(3, j).Value, InStr(ActiveSheet.Cells(3, j).Value, Chr(10)) - 1)
+Sub CompterTrigger()
+    
+    Dim derLD, derCD, j, k As Integer
+    Dim derniereUpdate As String
+    Dim nb_trigger As Integer
+    Dim liste_trigger As String
+    Dim derniereL As Integer
+    Dim annee_en_cours As Integer
+    Dim cellYear As String
+    Dim position As Integer
+    
+    derniereL = Sheets("1Source").Cells(Rows.Count, 3).End(xlUp).Row
+    derLD = Sheets("2Datas").Cells(Rows.Count, 3).End(xlUp).Row
+    derCD = Sheets("2Datas").Cells(3, Columns.Count).End(xlToLeft).Column
+    annee_en_cours = Year(Date)
+    
+    derniereUpdate = Format(Now(), "dd.mm.yyyy h:mm AM/PM")
+    
+    With Sheets("4DetailsTriggers").Range("A1")
+        .Value = "Dernière actualisation le : " & derniereUpdate
+        .Interior.Color = RGB(165, 165, 165)
+        .BorderAround _
+            ColorIndex:=1, Weight:=xlMedium
+        .Font.Bold = True
+        .HorizontalAlignment = xlCenter
+        .Font.Size = 9
+    
+    End With
+    
+    'Sheets("1Source").Range("D3:E" & derniereL).Copy
+    'Sheets("4DetailsTriggers").Range("C3:D" & derniereL).PasteSpecial Paste:=xlPasteValues, Operation:=xlNone, SkipBlanks _
+    '    :=False, Transpose:=False
+            
+    'Sheets("1Source").Range("J4:L" & derniereL).Copy
+    'Sheets("4DetailsTriggers").Range("G4:I" & derniereL).PasteSpecial Paste:=xlPasteValuesAndNumberFormats, Operation:=xlNone, SkipBlanks _
+    '    :=False, Transpose:=False
+     
+    Sheets("4DetailsTriggers").Range("C3").Value = "ISO Country Code"
+    Sheets("4DetailsTriggers").Range("C3").Interior.Color = RGB(165, 165, 165)
+    Sheets("4DetailsTriggers").Range("C3").BorderAround _
+        ColorIndex:=1, Weight:=xlMedium
+    Sheets("4DetailsTriggers").Range("C3").HorizontalAlignment = xlCenter
+    Sheets("4DetailsTriggers").Range("C3").Font.Bold = True
+     
+    Sheets("4DetailsTriggers").Range("D3").Value = "Country Name"
+    Sheets("4DetailsTriggers").Range("D3").Interior.Color = RGB(165, 165, 165)
+    Sheets("4DetailsTriggers").Range("D3").BorderAround _
+        ColorIndex:=1, Weight:=xlMedium
+    Sheets("4DetailsTriggers").Range("D3").HorizontalAlignment = xlCenter
+    Sheets("4DetailsTriggers").Range("D3").Font.Bold = True
+     
+    Sheets("4DetailsTriggers").Range("E3").Value = "Nombre de triggers activés"
+    Sheets("4DetailsTriggers").Range("E3").Interior.Color = RGB(165, 165, 165)
+    Sheets("4DetailsTriggers").Range("E3").BorderAround _
+        ColorIndex:=1, Weight:=xlMedium
+    Sheets("4DetailsTriggers").Range("E3").HorizontalAlignment = xlCenter
+    Sheets("4DetailsTriggers").Range("E3").Font.Bold = True
+    
+    Sheets("4DetailsTriggers").Range("F3").Value = "Liste des triggers activés"
+    Sheets("4DetailsTriggers").Range("F3").Interior.Color = RGB(165, 165, 165)
+    Sheets("4DetailsTriggers").Range("F3").HorizontalAlignment = xlCenter
+    Sheets("4DetailsTriggers").Range("F3").BorderAround _
+        ColorIndex:=1, Weight:=xlMedium
+    Sheets("4DetailsTriggers").Range("F3").Font.Bold = True
+    
+    Sheets("4DetailsTriggers").Range("G3").Value = "Dernière revue"
+    Sheets("4DetailsTriggers").Range("G3").Interior.Color = RGB(165, 165, 165)
+    Sheets("4DetailsTriggers").Range("G3").HorizontalAlignment = xlCenter
+    Sheets("4DetailsTriggers").Range("G3").BorderAround _
+        ColorIndex:=1, Weight:=xlMedium
+    Sheets("4DetailsTriggers").Range("G3").Font.Bold = True
+    
+    Sheets("4DetailsTriggers").Range("H3").Value = "Traitement préférentiel"
+    Sheets("4DetailsTriggers").Range("H3").Interior.Color = RGB(165, 165, 165)
+    Sheets("4DetailsTriggers").Range("H3").HorizontalAlignment = xlCenter
+    Sheets("4DetailsTriggers").Range("H3").BorderAround _
+        ColorIndex:=1, Weight:=xlMedium
+    Sheets("4DetailsTriggers").Range("H3").Font.Bold = True
+    
+    Sheets("4DetailsTriggers").Range("I3").Value = "Limites BRC"
+    Sheets("4DetailsTriggers").Range("I3").Interior.Color = RGB(165, 165, 165)
+    Sheets("4DetailsTriggers").Range("I3").HorizontalAlignment = xlCenter
+    Sheets("4DetailsTriggers").Range("I3").BorderAround _
+        ColorIndex:=1, Weight:=xlMedium
+    Sheets("4DetailsTriggers").Range("I3").Font.Bold = True
+    
+    For j = 4 To derLD
+        nb_trigger = 0
+        liste_trigger = ""
+        For k = 9 To derCD
+            position = InStr(1, Sheets("2Datas").Cells(3, k).Value, Chr(10))
+            If position > 0 Then
+                cellYear = Trim(Mid(Sheets("2Datas").Cells(3, k).Value, position + 1))
             Else
-                firstLine = ActiveSheet.Cells(3, j).Value
+                cellYear = "0000"
             End If
+            If Sheets("2Datas").Cells(j, k).Interior.ColorIndex = 22 Then
+                If cellYear = annee_en_cours Then
+                    nb_trigger = nb_trigger + 1
+                    liste_trigger = liste_trigger & Sheets("2Datas").Cells(2, k).Value & " ; "
+                End If
+            End If
+        Next
+        Sheets("4DetailsTriggers").Cells(j, 3).Value = Sheets("2Datas").Cells(j, 4).Value
+        Sheets("4DetailsTriggers").Cells(j, 4).Value = Sheets("2Datas").Cells(j, 5).Value
+        Sheets("4DetailsTriggers").Cells(j, 5).Value = nb_trigger
+        Sheets("4DetailsTriggers").Cells(j, 6).Value = liste_trigger
+        Sheets("4DetailsTriggers").Cells(j, 7).Value = Sheets("1Source").Cells(j, 10).Value
+        Sheets("4DetailsTriggers").Cells(j, 8).Value = Sheets("1Source").Cells(j, 11).Value
+        Sheets("4DetailsTriggers").Cells(j, 9).Value = Sheets("1Source").Cells(j, 12).Value
+        Sheets("2Datas").Cells(j, 8).Value = nb_trigger
+    Next
+    
+    Call TriTableauTriggers
+        
+    Sheets("4DetailsTriggers").Columns("C:I").AutoFit
+    Sheets("4DetailsTriggers").Activate
+
+End Sub
