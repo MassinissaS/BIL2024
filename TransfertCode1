@@ -1,26 +1,51 @@
-Dim derL As Long, derL_SDC As Long
-    Dim fichier_source As Workbook
-    Dim fichier_destination As Workbook
-    Dim chemin_fichier_source As String
-    Dim i As Long, j As Long
-    Dim k As Long, l As Long
-    Dim derniereL As Long
-    Dim date_donnees As String
 
-    chemin_fichier_source = Application.GetOpenFilename()
-    Set fichier_source = Workbooks.Open(chemin_fichier_source)
-    Set fichier_destination = Workbooks("Suivi-Souverains-Indicateurs.xlsm")
+Sub Etape3()
+
+    Dim derniereL As Integer
+    Dim derniereC As Integer
+    Dim compteur As Integer
+    Dim i As Integer
+    Dim j As Integer
+    Dim tbl As ListObject
+    Dim tbl_2 As ListObject
+    Dim latest_date_actu As Date
+    Dim latest_date_old As Date
     
-    derL = fichier_destination.Sheets("2Datas").Cells(fichier_destination.Sheets("2Datas").Rows.Count, 3).End(xlUp).Row
-    derL_SDC = fichier_source.Sheets("Data").Cells(fichier_source.Sheets("Data").Rows.Count, 6).End(xlUp).Row
-    derniereL = fichier_destination.Sheets("1Source").Cells(fichier_destination.Sheets("1Source").Rows.Count, 3).End(xlUp).Row
+    compteur = 0
+
+    Set tbl = Sheets("1Current").ListObjects("Tableau_1Current")
+    Set tbl_2 = Sheets("1.5Passage").ListObjects("Tableau_1.5Passage")
     
-    date_donnees = fichier_source.Sheets("Intro").Cells(7, 2).Value
-    fichier_destination.Sheets("2Datas").Range("A1").Value = "Les données proviennent du : " & date_donnees
-    fichier_destination.Sheets("2Datas").Range("A1").Interior.Color = RGB(165, 165, 165)
-    fichier_destination.Sheets("2Datas").Range("A1").Font.Bold = True
-    fichier_destination.Sheets("2Datas").Range("A1").Font.Size = 9
+    derniereL = tbl.DataBodyRange.Rows.Count
+    derniereC = tbl.DataBodyRange.Columns.Count
     
-    fichier_destination.Activate
+    latest_date_actu = LatestDate(Sheets("1Current"))
+    latest_date_old = LatestDate(Sheets("1.5Passage"))
+
+    For i = 1 To derniereL
+        For j = 2 To derniereC - 7
+            If tbl.DataBodyRange(i, j) <> tbl_2.DataBodyRange(i, j) Then
+                tbl.DataBodyRange(i, j).Interior.ColorIndex = 6
+                compteur = compteur + 1
+            End If
+        Next j
+    Next i
     
-    Call EnleverTrigger(fichier_destination.Sheets("2Datas"))
+    Call CalculerNoteMediane
+    
+    If latest_date_actu > latest_date_old Then
+        If compteur > 0 Then
+            MsgBox "Il y a eu " & compteur & " changements de ratings au total"
+        End If
+        Call VerifierTrigger(Sheets("1.5Passage"))
+        Call ArchivageOnglet
+        Call SupprimerPage(Sheets("2Previous"))
+        Sheets("1.5Passage").Name = "2Previous"
+        MsgBox "De nouvelles données sont disponibles. Archive effectuée" 'Phase de test
+    ElseIf latest_date_actu = latest_date_old Then
+        Call SupprimerPage(Sheets("1.5Passage"))
+        Call VerifierTrigger(Sheets("2Previous"))
+        MsgBox "Pas de nouvelles données"
+    End If
+        
+End Sub
