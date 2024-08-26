@@ -1,23 +1,23 @@
-With rng.Borders(xlEdgeLeft)
-        .LineStyle = xlContinuous
-        .Color = RGB(0, 0, 0)
-        .Weight = xlThick
-    End With
+Sub ExtractMonthAndYear()
+    Dim text As String
+    Dim monthAndYear As String
+    Dim monthName As String
+    Dim yearValue As String
+    Dim startPos As Integer
     
-    With rng.Borders(xlEdgeTop)
-        .LineStyle = xlContinuous
-        .Color = RGB(0, 0, 0)
-        .Weight = xlThick
-    End With
+    ' Le texte de la cellule (remplacez A1 par votre cellule réelle)
+    text = ThisWorkbook.Sheets("Sheet1").Range("A1").Value
     
-    With rng.Borders(xlEdgeBottom)
-        .LineStyle = xlContinuous
-        .Color = RGB(0, 0, 0)
-        .Weight = xlThick
-    End With
+    ' Trouver la position de "de :" pour commencer l'extraction
+    startPos = InStr(text, "de :") + Len("de :")
     
-    With rng.Borders(xlEdgeRight)
-        .LineStyle = xlContinuous
-        .Color = RGB(0, 0, 0)
-        .Weight = xlThick
-    End With
+    ' Extraire le texte après "de :"
+    monthAndYear = Trim(Mid(text, startPos))
+    
+    ' Séparer le mois et l'année
+    monthName = Split(monthAndYear)(0)
+    yearValue = Split(monthAndYear)(1)
+    
+    ' Afficher les résultats (ou les utiliser dans votre code)
+    MsgBox "Mois: " & monthName & vbCrLf & "Année: " & yearValue
+End Sub
