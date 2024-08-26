@@ -1,23 +1,85 @@
-Sub ExtractMonthAndYear()
-    Dim text As String
-    Dim monthAndYear As String
-    Dim monthName As String
-    Dim yearValue As String
+Sub RatingsExternes3()
+
+    Dim derniereL As Integer
+    Dim derniereC As Integer
+    Dim compteur As Integer
+    Dim i As Integer
+    Dim j As Integer
+    Dim k As Integer
+    Dim tbl As ListObject
+    Dim tbl_2 As ListObject
+    Dim eqty As Variant
+    Dim derniereUpdate As String
+    Dim currentMonth As String
+    Dim currentYear As String
     Dim startPos As Integer
+    Dim monthAndYear As String
+    Dim monthName_old As String
+    Dim yearValue_old As String
+    Dim text As String
     
-    ' Le texte de la cellule (remplacez A1 par votre cellule réelle)
-    text = ThisWorkbook.Sheets("Sheet1").Range("A1").Value
+    derniereUpdate = Format(Now(), "dd.mm.yyyy h:mm AM/PM")
+    Sheets("1Current").Range("A1").Value = "Last update on : " & derniereUpdate
+    Sheets("1Current").Range("A1").Interior.Color = RGB(165, 165, 165)
+    Sheets("1Current").Range("A1").Font.Bold = True
+    Sheets("1Current").Range("A1").Font.Size = 9
     
-    ' Trouver la position de "de :" pour commencer l'extraction
-    startPos = InStr(text, "de :") + Len("de :")
+    currentMonth = Format(Now(), "mmmm")
+    currentYear = Year(Now())
     
-    ' Extraire le texte après "de :"
+    text = Sheets("1.5Passage").Range("C1").Value
+    startPos = InStr(text, "of :") + Len("of :")
     monthAndYear = Trim(Mid(text, startPos))
+    monthName_old = Split(monthAndYear)(0)
+    yearValue_old = Split(monthAndYear)(1)
     
-    ' Séparer le mois et l'année
-    monthName = Split(monthAndYear)(0)
-    yearValue = Split(monthAndYear)(1)
+    With Sheets("1Current").Range("C1:D1")
+        .Merge
+        .HorizontalAlignment = xlCenter
+        .Interior.Color = RGB(165, 165, 165)
+        .BorderAround _
+            ColorIndex:=1, Weight:=xlMedium
+    End With
     
-    ' Afficher les résultats (ou les utiliser dans votre code)
-    MsgBox "Mois: " & monthName & vbCrLf & "Année: " & yearValue
+    Sheets("1Current").Cells(1, 3).Value = "The data concerns the month of : " & currentMonth & " " & currentYear
+    
+    compteur = 0
+
+    Set tbl = Sheets("1Current").ListObjects("Tableau_1Current")
+    Set tbl_2 = Sheets("1.5Passage").ListObjects("Tableau_1.5Passage")
+    
+    derniereL = tbl.DataBodyRange.Rows.Count
+    derniereC = tbl.DataBodyRange.Columns.Count
+    
+    For i = 1 To derniereL
+        For j = 4 To derniereC - 2
+            eqty = tbl.DataBodyRange(i, 3).Value
+            If eqty > 5000000000# Or eqty = "-" Then
+                tbl.DataBodyRange(i, 4).Value = "Framework 1"
+            ElseIf eqty < 5000000000# Then
+                tbl.DataBodyRange(i, 4).Value = "Framework 2"
+            End If
+            If tbl.DataBodyRange(i, j) <> tbl_2.DataBodyRange(i, j) Then
+                tbl.DataBodyRange(i, j).Interior.ColorIndex = 6
+                compteur = compteur + 1
+            End If
+        Next
+    Next i
+    
+    Call CalculerNoteMediane
+    
+    If currentMonth = monthName_old Then
+        If compteur > 0 Then
+            If compteur = 1 Then
+                MsgBox "There was " & compteur & " rating change"
+            Else
+                MsgBox "There were " & compteur & " ratings changes"
+        End If
+        Call SupprimerPage(Sheets("1.5Previous"))
+        Call TriggersRatings
+        Call CompterTrigger
+    Else
+        'Archivage de l'onglet 1.5Passage à faire. 1.5Passage devient 2Previous
+    End If
+        
 End Sub
