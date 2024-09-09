@@ -1,102 +1,68 @@
-Sub ArchivageOnglet()
+Sub Etape2()
 
-    Dim sourceWorkbook As Workbook
-    Dim destinationWorkbook As Workbook
-    Dim sheetToCopy As Worksheet
-    Dim summaryToCopy As Worksheet
-    Dim destinationPath As String
-    Dim destinationFileName As String
-    Dim latest_date_old As Date
-    Dim copiedSheet As Worksheet
-    Dim copiedSummary As Worksheet
-    Dim fileExists As Boolean
-    Dim startPos As Integer
-    Dim monthAndYear As String
-    Dim monthName_old As String
-    Dim yearValue_old As String
-    Dim text As String
-    Dim m As Integer
-    Dim derniereL As Integer
+    Dim derniereL, derniereC, i As Integer
+    Dim rng As Range
+    Dim cell As Range
+    Dim cellValue As Double
+    Dim colWidths() As Double
     
-    ' Obtenir le nom du mois et de l'année
-    text = Sheets("1.5Passage").Range("C1").Value
-    startPos = InStr(text, "of :") + Len("of :")
-    monthAndYear = Trim(Mid(text, startPos))
-    monthName_old = Split(monthAndYear)(0)
-    yearValue_old = Split(monthAndYear)(1)
+    derniereL = Sheets("1Current").Cells(Rows.Count, 3).End(xlUp).Row
+    derniereC = Sheets("1Current").Cells(3, Columns.Count).End(xlToLeft).Column
     
-    ' Spécifiez le chemin du répertoire et le nom du fichier de destination
-    destinationPath = "H:\Outils\Archives-Banques-Ratings\"
-    destinationFileName = "Archives-Banques-Ratings-" & yearValue_old & ".xlsx"
+    For i = 3 To derniereC
+        colWidths(i) = Sheets("1Current").Columns(i).ColumnWidth
+    Next
     
-    ' Vérifier si le fichier existe
-    If Dir(destinationPath & destinationFileName) <> "" Then
-        fileExists = True
-    Else
-        fileExists = False
-    End If
+    Call CopierCollerValeurs(Sheets("1Current"))
     
-    ' Ouvrir le classeur de destination ou le créer s'il n'existe pas
-    If fileExists Then
-        Set destinationWorkbook = Workbooks.Open(destinationPath & destinationFileName)
-    Else
-        Set destinationWorkbook = Workbooks.Add
-        destinationWorkbook.SaveAs Filename:=destinationPath & destinationFileName
-    End If
-
-    ' Référencez le classeur source et la feuille à copier
-    Set sourceWorkbook = ThisWorkbook  ' Assumant que le code est exécuté à partir du classeur source
-    Set sheetToCopy = sourceWorkbook.Sheets("1.5Passage")  ' Changez ceci pour le nom de la feuille à copier
-
-    ' Copier la feuille dans le classeur de destination
-    sheetToCopy.Copy Before:=destinationWorkbook.Sheets(1)
+    Sheets("1Current").Range(Cells(3, 3), Cells(derniereL, derniereC)).Borders.LineStyle = xlNone
     
-    ' Vérifier si un onglet avec le même nom n'existe pas déjà
-    On Error Resume Next
-    Set copiedSheet = destinationWorkbook.Sheets(monthName_old & " " & yearValue_old)
-    On Error GoTo 0
+    Call CreerTableau(Sheets("1Current"))
     
-    If Not copiedSheet Is Nothing Then
-        MsgBox "A tab with the same name already exists", vbExclamation
-        destinationWorkbook.Close SaveChanges:=False
-        Exit Sub
-    End If
+    With Sheets("1Current").Range(Cells(3, 3), Cells(derniereL, derniereC)).Borders(xlEdgeLeft)
+        .LineStyle = xlContinuous
+        .Color = RGB(0, 0, 0)
+        .Weight = xlMedium
+    End With
     
-    ' Remplacer le nom de la feuille par la date des CDS
-    Set copiedSheet = destinationWorkbook.Sheets(1)
-    copiedSheet.Name = monthName_old & " " & yearValue_old
+    With Sheets("1Current").Range(Cells(3, 3), Cells(3, derniereC)).Borders(xlInsideVertical)
+        .LineStyle = xlContinuous
+        .Color = RGB(255, 255, 255)
+        .Weight = xlThin
+    End With
     
-    ' Si on est en décembre alors copier le summary de l'année
-    If monthName_old = "December" Then
+    With Sheets("1Current").Range(Cells(3, 3), Cells(3, derniereC)).Borders(xlEdgeBottom)
+        .LineStyle = xlContinuous
+        .Color = RGB(255, 255, 255)
+        .Weight = xlThin
+    End With
+    
+    With Sheets("1Current").Range(Cells(3, 3), Cells(derniereL, derniereC)).Borders(xlEdgeRight)
+        .LineStyle = xlContinuous
+        .Color = RGB(0, 0, 0)
+        .Weight = xlMedium
+    End With
         
-        derniereL = sourceWorkbook.Sheets("1Current").Cells(Rows.count, 3).End(xlUp).Row
-        
-        Set summaryToCopy = sourceWorkbook.Sheets("3Summary")
-        summaryToCopy.Copy Before:=destinationWorkbook.Sheets(1)
-        On Error Resume Next
-        Set copiedSummary = destinationWorkbook.Sheets("Summary")
-        On Error GoTo 0
-        If Not copiedSummary Is Nothing Then
-            MsgBox "A tab with the same name already exists", vbExclamation
-            destinationWorkbook.Close SaveChanges:=False
+    Sheets("1Current").Range(Cells(4, 8), Cells(derniereL, derniereC)).HorizontalAlignment = xlLeft
+    
+    Set rng = Sheets("1Current").Range(Cells(4, 8), Cells(derniereL, derniereC))
+    
+    For Each cell In rng
+        If IsNumeric(cell.Value) Then
+            cellValue = cell.Value
+            
+            If cellValue = Int(cellValue) Then
+                cell.NumberFormat = "#,##0"
+            Else
+                cell.NumberFormat = "#,##0.00"
+            End If
         End If
-        Set copiedSummary = destinationWorkbook.Sheets(1)
-        copiedSummary.Name = "Summary"
-        
-        sourceWorkbook.Sheets("3Summary").Range("C4:E300").ClearContents
-        
-        For m = 4 To derniereL
-            sourceWorkbook.Sheets("3Summary").Cells(m, 3).Value = sourceWorkbook.Sheets("1Current").Cells(m, 4).Value
-        Next m
-        
-    End If
+    Next
     
-    ' Sauvegarder et fermer le classeur de destination
-    destinationWorkbook.Save
-    destinationWorkbook.Close
+    For i = 3 To derniereC
+        Sheets("1Current").Columns(i).ColumnWidth = colWidths(i)
+    Next
 
-    ' Message de confirmation - à supprimer après la phase de test
-    MsgBox "The data has been archived in " & destinationFileName
-
+    Sheets("1Current").Range(Cells(2, 1), Cells(2, derniereC)).ClearContents
 
 End Sub
