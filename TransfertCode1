@@ -1,51 +1,102 @@
+Sub ArchivageOnglet()
 
-Sub Etape3()
-
-    Dim derniereL As Integer
-    Dim derniereC As Integer
-    Dim compteur As Integer
-    Dim i As Integer
-    Dim j As Integer
-    Dim tbl As ListObject
-    Dim tbl_2 As ListObject
-    Dim latest_date_actu As Date
+    Dim sourceWorkbook As Workbook
+    Dim destinationWorkbook As Workbook
+    Dim sheetToCopy As Worksheet
+    Dim summaryToCopy As Worksheet
+    Dim destinationPath As String
+    Dim destinationFileName As String
     Dim latest_date_old As Date
+    Dim copiedSheet As Worksheet
+    Dim copiedSummary As Worksheet
+    Dim fileExists As Boolean
+    Dim startPos As Integer
+    Dim monthAndYear As String
+    Dim monthName_old As String
+    Dim yearValue_old As String
+    Dim text As String
+    Dim m As Integer
+    Dim derniereL As Integer
     
-    compteur = 0
-
-    Set tbl = Sheets("1Current").ListObjects("Tableau_1Current")
-    Set tbl_2 = Sheets("1.5Passage").ListObjects("Tableau_1.5Passage")
+    ' Obtenir le nom du mois et de l'année
+    text = Sheets("1.5Passage").Range("C1").Value
+    startPos = InStr(text, "of :") + Len("of :")
+    monthAndYear = Trim(Mid(text, startPos))
+    monthName_old = Split(monthAndYear)(0)
+    yearValue_old = Split(monthAndYear)(1)
     
-    derniereL = tbl.DataBodyRange.Rows.Count
-    derniereC = tbl.DataBodyRange.Columns.Count
+    ' Spécifiez le chemin du répertoire et le nom du fichier de destination
+    destinationPath = "H:\Outils\Archives-Banques-Ratings\"
+    destinationFileName = "Archives-Banques-Ratings-" & yearValue_old & ".xlsx"
     
-    latest_date_actu = LatestDate(Sheets("1Current"))
-    latest_date_old = LatestDate(Sheets("1.5Passage"))
-
-    For i = 1 To derniereL
-        For j = 2 To derniereC - 7
-            If tbl.DataBodyRange(i, j) <> tbl_2.DataBodyRange(i, j) Then
-                tbl.DataBodyRange(i, j).Interior.ColorIndex = 6
-                compteur = compteur + 1
-            End If
-        Next j
-    Next i
-    
-    Call CalculerNoteMediane
-    
-    If latest_date_actu > latest_date_old Then
-        If compteur > 0 Then
-            MsgBox "Il y a eu " & compteur & " changements de ratings au total"
-        End If
-        Call VerifierTrigger(Sheets("1.5Passage"))
-        Call ArchivageOnglet
-        Call SupprimerPage(Sheets("2Previous"))
-        Sheets("1.5Passage").Name = "2Previous"
-        MsgBox "De nouvelles données sont disponibles. Archive effectuée" 'Phase de test
-    ElseIf latest_date_actu = latest_date_old Then
-        Call SupprimerPage(Sheets("1.5Passage"))
-        Call VerifierTrigger(Sheets("2Previous"))
-        MsgBox "Pas de nouvelles données"
+    ' Vérifier si le fichier existe
+    If Dir(destinationPath & destinationFileName) <> "" Then
+        fileExists = True
+    Else
+        fileExists = False
     End If
+    
+    ' Ouvrir le classeur de destination ou le créer s'il n'existe pas
+    If fileExists Then
+        Set destinationWorkbook = Workbooks.Open(destinationPath & destinationFileName)
+    Else
+        Set destinationWorkbook = Workbooks.Add
+        destinationWorkbook.SaveAs Filename:=destinationPath & destinationFileName
+    End If
+
+    ' Référencez le classeur source et la feuille à copier
+    Set sourceWorkbook = ThisWorkbook  ' Assumant que le code est exécuté à partir du classeur source
+    Set sheetToCopy = sourceWorkbook.Sheets("1.5Passage")  ' Changez ceci pour le nom de la feuille à copier
+
+    ' Copier la feuille dans le classeur de destination
+    sheetToCopy.Copy Before:=destinationWorkbook.Sheets(1)
+    
+    ' Vérifier si un onglet avec le même nom n'existe pas déjà
+    On Error Resume Next
+    Set copiedSheet = destinationWorkbook.Sheets(monthName_old & " " & yearValue_old)
+    On Error GoTo 0
+    
+    If Not copiedSheet Is Nothing Then
+        MsgBox "A tab with the same name already exists", vbExclamation
+        destinationWorkbook.Close SaveChanges:=False
+        Exit Sub
+    End If
+    
+    ' Remplacer le nom de la feuille par la date des CDS
+    Set copiedSheet = destinationWorkbook.Sheets(1)
+    copiedSheet.Name = monthName_old & " " & yearValue_old
+    
+    ' Si on est en décembre alors copier le summary de l'année
+    If monthName_old = "December" Then
         
+        derniereL = sourceWorkbook.Sheets("1Current").Cells(Rows.count, 3).End(xlUp).Row
+        
+        Set summaryToCopy = sourceWorkbook.Sheets("3Summary")
+        summaryToCopy.Copy Before:=destinationWorkbook.Sheets(1)
+        On Error Resume Next
+        Set copiedSummary = destinationWorkbook.Sheets("Summary")
+        On Error GoTo 0
+        If Not copiedSummary Is Nothing Then
+            MsgBox "A tab with the same name already exists", vbExclamation
+            destinationWorkbook.Close SaveChanges:=False
+        End If
+        Set copiedSummary = destinationWorkbook.Sheets(1)
+        copiedSummary.Name = "Summary"
+        
+        sourceWorkbook.Sheets("3Summary").Range("C4:E300").ClearContents
+        
+        For m = 4 To derniereL
+            sourceWorkbook.Sheets("3Summary").Cells(m, 3).Value = sourceWorkbook.Sheets("1Current").Cells(m, 4).Value
+        Next m
+        
+    End If
+    
+    ' Sauvegarder et fermer le classeur de destination
+    destinationWorkbook.Save
+    destinationWorkbook.Close
+
+    ' Message de confirmation - à supprimer après la phase de test
+    MsgBox "The data has been archived in " & destinationFileName
+
+
 End Sub
