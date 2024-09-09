@@ -1,159 +1,91 @@
-Sub CompterTrigger()
-    
-    Dim derLD, derCD, j, k, l As Integer
-    Dim derniereUpdate As String
-    Dim nb_trigger As Integer
-    Dim liste_trigger As String
-    Dim derniereL As Integer
-    Dim derniereLR As Integer
-    Dim annee_en_cours As Integer
-    Dim cellYear As String
-    Dim position As Integer
-    
-    derniereL = Sheets("0Source").Cells(Rows.Count, 3).End(xlUp).Row
-    derLD = Sheets("1Current").Cells(Rows.Count, 3).End(xlUp).Row
-    derCD = Sheets("1Current").Cells(3, Columns.Count).End(xlToLeft).Column
-    annee_en_cours = Year(Date)
-    
-    MsgBox derCD
-    
-    derniereUpdate = Format(Now(), "dd.mm.yyyy h:mm AM/PM")
-    
-    With Sheets("3Summary").Range("A1")
-        .Value = "Dernière actualisation le : " & derniereUpdate
-        .Interior.Color = RGB(165, 165, 165)
-        .BorderAround _
-            ColorIndex:=1, Weight:=xlMedium
-        .Font.Bold = True
-        .HorizontalAlignment = xlCenter
-        .Font.Size = 9
-    
-    End With
-     
-    Sheets("3Summary").Range("C3").Value = "ISO Country Code"
-    Sheets("3Summary").Range("C3").Interior.Color = RGB(112, 48, 160)
-    Sheets("3Summary").Range("C3").BorderAround _
-        ColorIndex:=1, Weight:=xlMedium
-    Sheets("3Summary").Range("C3").HorizontalAlignment = xlCenter
-    Sheets("3Summary").Range("C3").Font.Bold = True
-     
-    Sheets("3Summary").Range("D3").Value = "Country Name"
-    Sheets("3Summary").Range("D3").Interior.Color = RGB(112, 48, 160)
-    Sheets("3Summary").Range("D3").BorderAround _
-        ColorIndex:=1, Weight:=xlMedium
-    Sheets("3Summary").Range("D3").HorizontalAlignment = xlCenter
-    Sheets("3Summary").Range("D3").Font.Bold = True
-     
-    Sheets("3Summary").Range("E3").Value = "Nombre de triggers activés"
-    Sheets("3Summary").Range("E3").Interior.Color = RGB(112, 48, 160)
-    Sheets("3Summary").Range("E3").BorderAround _
-        ColorIndex:=1, Weight:=xlMedium
-    Sheets("3Summary").Range("E3").HorizontalAlignment = xlCenter
-    Sheets("3Summary").Range("E3").Font.Bold = True
-    
-    Sheets("3Summary").Range("F3").Value = "Liste des triggers activés"
-    Sheets("3Summary").Range("F3").Interior.Color = RGB(112, 48, 160)
-    Sheets("3Summary").Range("F3").HorizontalAlignment = xlCenter
-    Sheets("3Summary").Range("F3").BorderAround _
-        ColorIndex:=1, Weight:=xlMedium
-    Sheets("3Summary").Range("F3").Font.Bold = True
-    
-    Sheets("3Summary").Range("G3").Value = "Dernière revue"
-    Sheets("3Summary").Range("G3").Interior.Color = RGB(112, 48, 160)
-    Sheets("3Summary").Range("G3").HorizontalAlignment = xlCenter
-    Sheets("3Summary").Range("G3").BorderAround _
-        ColorIndex:=1, Weight:=xlMedium
-    Sheets("3Summary").Range("G3").Font.Bold = True
-    
-    Sheets("3Summary").Range("H3").Value = "Traitement préférentiel"
-    Sheets("3Summary").Range("H3").Interior.Color = RGB(112, 48, 160)
-    Sheets("3Summary").Range("H3").HorizontalAlignment = xlCenter
-    Sheets("3Summary").Range("H3").BorderAround _
-        ColorIndex:=1, Weight:=xlMedium
-    Sheets("3Summary").Range("H3").Font.Bold = True
-    
-    Sheets("3Summary").Range("I3").Value = "Limites BRC"
-    Sheets("3Summary").Range("I3").Interior.Color = RGB(112, 48, 160)
-    Sheets("3Summary").Range("I3").HorizontalAlignment = xlCenter
-    Sheets("3Summary").Range("I3").BorderAround _
-        ColorIndex:=1, Weight:=xlMedium
-    Sheets("3Summary").Range("I3").Font.Bold = True
-    
-    For j = 4 To derLD
-        nb_trigger = 0
-        liste_trigger = ""
-        For k = 9 To derCD
-            position = InStr(1, Sheets("1Current").Cells(3, k).Value, Chr(10))
-            If position > 0 Then
-                cellYear = Trim(Mid(Sheets("1Current").Cells(3, k).Value, position + 1))
-            Else
-                cellYear = "0000"
-            End If
-            
-            If Sheets("1Current").Cells(j, k).Interior.ColorIndex = 22 Then
-                If cellYear = CStr(annee_en_cours) Or Right(Sheets("1Current").Cells(3, k).Value, 6) = "Latest" Or Sheets("1Current").Cells(3, k).Value = "Avg of all 6" Then
-                    nb_trigger = nb_trigger + 1
-                    liste_trigger = liste_trigger & Left(Sheets("1Current").Cells(3, k).Value, InStr(Sheets("1Current").Cells(3, k).Value, Chr(10)) - 1) & " ; "
-                End If
-            End If
-        Next
-        
-        Sheets("3Summary").Cells(j, 3).Value = Sheets("1Current").Cells(j, 4).Value
-        Sheets("3Summary").Cells(j, 4).Value = Sheets("1Current").Cells(j, 5).Value
-        Sheets("3Summary").Cells(j, 5).Value = nb_trigger
-        Sheets("3Summary").Cells(j, 6).Value = liste_trigger
-        Sheets("3Summary").Cells(j, 7).Value = Sheets("0Source").Cells(j, 10).Value
-        Sheets("3Summary").Cells(j, 8).Value = Sheets("0Source").Cells(j, 11).Value
-        Sheets("3Summary").Cells(j, 9).Value = Sheets("0Source").Cells(j, 12).Value
-        Sheets("1Current").Cells(j, 8).Value = nb_trigger
-    Next
-    
-    Call TriTableauTriggers
-    
-    derniereLR = Sheets("3Summary").Cells(Rows.Count, 3).End(xlUp).Row
-    
-    With Sheets("3Summary").Range("C3:I" & derniereLR).Borders(xlEdgeLeft)
-        .LineStyle = xlContinuous
-        .Color = RGB(0, 0, 0)
-        .Weight = xlMedium
-    End With
-        
-    With Sheets("3Summary").Range("C3:I" & derniereLR).Borders(xlEdgeTop)
-        .LineStyle = xlContinuous
-        .Color = RGB(0, 0, 0)
-        .Weight = xlMedium
-    End With
-        
-    With Sheets("3Summary").Range("C3:I" & derniereLR).Borders(xlEdgeBottom)
-        .LineStyle = xlContinuous
-        .Color = RGB(0, 0, 0)
-        .Weight = xlMedium
-    End With
-        
-    With Sheets("3Summary").Range("C3:I" & derniereLR).Borders(xlEdgeRight)
-        .LineStyle = xlContinuous
-        .Color = RGB(0, 0, 0)
-        .Weight = xlMedium
-    End With
-    
-    With Sheets("3Summary").Range("C4:I" & derniereLR).Borders(xlInsideVertical)
-        .LineStyle = xlContinuous
-        .Color = RGB(0, 0, 0)
-        .Weight = xlThin
-    End With
-    
-    With Sheets("3Summary").Range("C3:I3").Borders(xlInsideVertical)
-        .LineStyle = xlContinuous
-        .Color = RGB(255, 255, 255)
-        .Weight = xlThin
-    End With
-    
-    Sheets("3Summary").Range("C4:I" & derniereLR).Interior.Color = RGB(255, 255, 255)
-    
-    For l = 4 To derniereLR Step 2
-        Sheets("3Summary").Range("C" & l & ":I" & l).Interior.Color = RGB(217, 217, 217)
-    Next l
-    
-    Sheets("3Summary").Activate
+Sub ArchivageOnglet()
 
+    Dim sourceWorkbook As Workbook
+    Dim destinationWorkbook As Workbook
+    Dim sheetToCopy As Worksheet
+    Dim destinationPath As String
+    Dim destinationFileName As String
+    Dim latest_date_old As Date
+    Dim copiedSheet As Worksheet
+    Dim fileExists As Boolean
+    Dim startPos As Integer
+    Dim monthAndYear As String
+    Dim monthName_old As String
+    Dim yearValue_old As Integer ' Modifier pour un entier
+    Dim text As String
+    Dim sheetName As String
+
+    ' Obtenir le nom du mois et de l'année
+    text = Sheets("1.5Passage").Range("C1").Value
+    startPos = InStr(text, "of :") + Len("of :")
+    monthAndYear = Trim(Mid(text, startPos))
+    monthName_old = Split(monthAndYear)(0)
+    yearValue_old = CInt(Split(monthAndYear)(1)) ' Conversion en entier
+    
+    ' Soustraire 1 à l'année
+    yearValue_old = yearValue_old - 1
+    
+    ' Spécifiez le chemin du répertoire et le nom du fichier de destination
+    destinationPath = "H:\Outils\Archives-Banques-Ratings\"
+    destinationFileName = "Archives-Banques-Ratings-" & yearValue_old & ".xlsx"
+    
+    ' Vérifier si le fichier existe
+    If Dir(destinationPath & destinationFileName) <> "" Then
+        fileExists = True
+    Else
+        fileExists = False
+    End If
+    
+    ' Ouvrir le classeur de destination ou le créer s'il n'existe pas
+    If fileExists Then
+        Set destinationWorkbook = Workbooks.Open(destinationPath & destinationFileName)
+    Else
+        Set destinationWorkbook = Workbooks.Add
+        destinationWorkbook.SaveAs Filename:=destinationPath & destinationFileName
+    End If
+
+    ' Référencez le classeur source
+    Set sourceWorkbook = ThisWorkbook ' Assumant que le code est exécuté à partir du classeur source
+    
+    ' Fonction pour vérifier et supprimer une feuille si elle existe déjà
+    Call DeleteSheetIfExists(destinationWorkbook, "Summary")
+    Call DeleteSheetIfExists(destinationWorkbook, "Datas")
+    Call DeleteSheetIfExists(destinationWorkbook, "Thresholds")
+    
+    ' 1. Copier l'onglet "4Summary" et le renommer "Summary"
+    sourceWorkbook.Sheets("4Summary").Copy Before:=destinationWorkbook.Sheets(1)
+    Set copiedSheet = destinationWorkbook.Sheets(1)
+    copiedSheet.Name = "Summary"
+    
+    ' 2. Copier l'onglet "1.5Passage" et le renommer "Datas"
+    sourceWorkbook.Sheets("1.5Passage").Copy After:=destinationWorkbook.Sheets(1)
+    Set copiedSheet = destinationWorkbook.Sheets(2)
+    copiedSheet.Name = "Datas"
+    
+    ' 3. Copier l'onglet "3Thresholds" et le renommer "Thresholds"
+    sourceWorkbook.Sheets("3Thresholds").Copy After:=destinationWorkbook.Sheets(2)
+    Set copiedSheet = destinationWorkbook.Sheets(3)
+    copiedSheet.Name = "Thresholds"
+    
+    ' Sauvegarder et fermer le classeur de destination
+    destinationWorkbook.Save
+    destinationWorkbook.Close
+
+    ' Message de confirmation - à supprimer après la phase de test
+    MsgBox "The data has been archived in " & destinationFileName
+
+End Sub
+
+' Fonction pour supprimer une feuille si elle existe déjà
+Sub DeleteSheetIfExists(wb As Workbook, sheetName As String)
+    Dim ws As Worksheet
+    On Error Resume Next
+    Set ws = wb.Sheets(sheetName)
+    On Error GoTo 0
+    
+    If Not ws Is Nothing Then
+        Application.DisplayAlerts = False ' Désactiver les alertes pour supprimer la feuille sans confirmation
+        ws.Delete
+        Application.DisplayAlerts = True ' Réactiver les alertes
+    End If
 End Sub
