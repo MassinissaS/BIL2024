@@ -1,0 +1,171 @@
+Private Sub TextBox1_Change()
+     
+    Me.ListBox1.Clear
+    
+    Dim a, d, r, last_row, i As Integer
+    
+    last_row = Sheets("0Source").Range("E" & Rows.Count).End(xlUp).Row
+        
+    For d = 5 To 7
+        For r = 3 To last_row
+            a = Len(Me.TextBox1.Text)
+            i = SearchString(Sheets("0Source").Cells(r, 5).Value, ListBox1.List)
+            If UCase(Left(Sheets("0Source").Cells(r, d).Value, a)) = UCase(Me.TextBox1.Text) Then
+                With Me.ListBox1
+                    If Sheets("0Source").Cells(r, 5).Value <> "-" And i = -1 Then
+                        .AddItem Sheets("0Source").Cells(r, 5).Value
+                    End If
+                End With
+            End If
+        Next
+    Next
+    
+End Sub
+
+Private Sub CommandButton1_Click()
+ 
+    Dim x As Integer
+    Dim y As Integer
+    Dim z As Integer
+    Dim derlig As Long
+    Dim i As Integer
+    Dim j As Integer
+    Dim k As Integer
+       
+    derlig = Sheets("1Datas").Range("D" & Rows.Count).End(xlUp).Row
+    Set plage = Sheets("1Datas").Range("D4:D" & derlig)
+    plage.ClearContents
+    
+    ThisWorkbook.Itemsselected = ""
+    
+    z = 0
+    k = 0
+    
+    For j = 0 To ListBox1.ListCount - 1
+        If ListBox1.Selected(j) = True Then
+            k = k + 1
+        End If
+    Next j
+    
+    If k <> 0 Then
+        For x = 0 To ListBox1.ListCount - 1
+            If ListBox1.Selected(x) = True Then
+                ThisWorkbook.Itemsselected = ThisWorkbook.Itemsselected & ListBox1.List(x) & ";"
+                z = z + 1
+                ListBox1.Selected(x) = False
+            End If
+        Next x
+        
+        tableau = Split(ThisWorkbook.Itemsselected, ";")
+          
+        For y = 0 To z
+            i = SearchString(tableau(y), ListBox2.List)
+            If i = -1 And tableau(y) <> "" Then
+                ListBox2.AddItem tableau(y)
+            End If
+        Next y
+    End If
+
+End Sub
+
+
+Private Sub CommandButton2_Click()
+    
+    Dim x As Integer
+    Dim y As Integer
+    Dim z As Integer
+    Dim derlig As Long
+    Dim i As Integer
+    Dim j As Integer
+    Dim k As Integer
+       
+    derlig = Sheets("1Datas").Range("D" & Rows.Count).End(xlUp).Row
+    Set plage = Range("D4:D" & derlig)
+    plage.ClearContents
+    
+    ThisWorkbook.Itemsselected = ""
+    
+    z = 0
+    
+    If ListBox1.ListCount <> 0 Then
+        For x = 0 To ListBox1.ListCount - 1
+            ListBox1.Selected(x) = True
+            If ListBox1.Selected(x) = True Then
+                ThisWorkbook.Itemsselected = ThisWorkbook.Itemsselected & ListBox1.List(x) & ";"
+                z = z + 1
+                ListBox1.Selected(x) = False
+            End If
+        Next x
+        
+        tableau = Split(ThisWorkbook.Itemsselected, ";")
+        
+        For y = 0 To z
+            i = SearchString(tableau(y), ListBox2.List)
+            If i = -1 And tableau(y) <> "" Then
+                ListBox2.AddItem tableau(y)
+            End If
+        Next y
+    End If
+
+End Sub
+
+Private Sub CommandButton3_Click()
+
+    Dim i As Integer
+    
+    ListBox2.Clear
+
+    For i = 0 To ListBox1.ListCount - 1
+        ListBox1.Selected(i) = False
+    Next i
+    
+End Sub
+
+Private Sub CommandButton4_Click()
+
+    Dim i As Integer
+
+    If ListBox2.ListCount = 0 Then
+        MsgBox "You have not selected any banks. Please try again"
+    Else
+        For i = 0 To ListBox2.ListCount - 1
+            Sheets("1Datas").Range("D" & i + 4).Value = ThisWorkbook.dictBanques.Item(ListBox2.List(i))
+        Next i
+        
+        ThisWorkbook.Etat = "2"
+        Menu1_2.Hide
+        Menu2.Show
+    End If
+    
+End Sub
+
+Private Sub CommandButton5_Click()
+
+    Dim x As Integer
+    Dim y As Integer
+    
+    For x = ListBox2.ListCount - 1 To 0 Step -1
+        If ListBox2.Selected(x) = True Then
+            ListBox2.RemoveItem (x)
+        End If
+    Next x
+
+End Sub
+
+Private Function SearchString(mysearch As Variant, mylist As Variant) As Long
+    
+    Dim itm As Variant, idx As Long: idx = 0
+    
+    If IsArray(mylist) Then
+        For Each itm In mylist
+            If mysearch = itm Then
+                SearchString = idx: Exit Function
+            End If
+            idx = idx + 1
+        Next
+    End If
+    
+    SearchString = -1
+
+End Function
+
