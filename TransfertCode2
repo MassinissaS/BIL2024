@@ -12,11 +12,14 @@ Sub SauvegarderCopie()
         Exit Sub
     End If
 
-    ' Générer un nom de fichier basé sur le nom actuel avec la date et l'heure
+    ' Générer le nom de fichier basé sur le nom actuel (sans modification)
     nomFichier = ThisWorkbook.Name
-    nouvelleCheminComplet = cheminRepertoire & _
-                            Left(nomFichier, InStrRev(nomFichier, ".") - 1) & _
-                            "_" & Format(Now, "yyyy-mm-dd_hhmmss") & ".xlsm"
+    nouvelleCheminComplet = cheminRepertoire & nomFichier
+
+    ' Si le fichier existe déjà, il est supprimé
+    If Dir(nouvelleCheminComplet) <> "" Then
+        Kill nouvelleCheminComplet
+    End If
 
     ' Sauvegarder une copie du fichier
     ThisWorkbook.SaveCopyAs nouvelleCheminComplet
