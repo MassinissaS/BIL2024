@@ -1,18 +1,10 @@
 Sub SauvegarderVersionModifiee()
     Dim cheminRepertoire As String
-    Dim nomFichier As String
+    Dim nomFichierUtilisateur As String
     Dim nouvelleCheminComplet As String
     Dim wbCopie As Workbook
     Dim ws As Worksheet
-    Dim texteA1 As String
-    Dim moisTexte As String
-    Dim mois As Integer
-    Dim annee As Integer
-    Dim trimestre As Integer
-    Dim nomFichierAuto As String
-    Dim debutParenthese As Integer
-    Dim finParenthese As Integer
-    Dim contenuParenthese As String
+    Dim nomParDefaut As String
 
     ' Définir le répertoire de sauvegarde (modifiez ce chemin selon vos besoins)
     cheminRepertoire = "C:\Chemin\De\Votre\Répertoire\"
@@ -23,47 +15,20 @@ Sub SauvegarderVersionModifiee()
         Exit Sub
     End If
 
-    ' Récupérer le texte de la cellule A1 de l'onglet "1Current"
-    texteA1 = Sheets("1Current").Range("A1").Value
+    ' Définir le nom par défaut pour l'InputBox
+    nomParDefaut = "Archives-Souverains-T"
     
-    ' Trouver les positions des parenthèses
-    debutParenthese = InStr(texteA1, "(")
-    finParenthese = InStr(texteA1, ")")
+    ' Demander à l'utilisateur d'entrer le nom du fichier avec un nom par défaut proposé
+    nomFichierUtilisateur = InputBox("Entrez le nom du fichier à sauvegarder (sans extension) :", "Nom du fichier", nomParDefaut)
     
-    ' Extraire le contenu entre parenthèses
-    contenuParenthese = Mid(texteA1, debutParenthese + 1, finParenthese - debutParenthese - 1)
-    
-    ' Extraire le mois et l'année à partir du contenu entre parenthèses
-    moisTexte = Trim(Split(contenuParenthese)(0))  ' Récupère le mois en texte
-    annee = CInt(Trim(Split(contenuParenthese)(1))) ' Récupère l'année
-    
-    ' Convertir le mois en format numérique
-    Select Case moisTexte
-        Case "January": mois = 1
-        Case "February": mois = 2
-        Case "March": mois = 3
-        Case "April": mois = 4
-        Case "May": mois = 5
-        Case "June": mois = 6
-        Case "July": mois = 7
-        Case "August": mois = 8
-        Case "September": mois = 9
-        Case "October": mois = 10
-        Case "November": mois = 11
-        Case "December": mois = 12
-        Case Else
-            MsgBox "Le mois dans la cellule A1 n'est pas valide.", vbExclamation
-            Exit Sub
-    End Select
-    
-    ' Calculer le numéro du trimestre en fonction du mois
-    trimestre = Application.WorksheetFunction.RoundUp(mois / 3, 0)
+    ' Si l'utilisateur n'a rien entré, arrêter la macro
+    If nomFichierUtilisateur = "" Then
+        MsgBox "Le nom du fichier ne peut pas être vide. Veuillez entrer un nom valide.", vbExclamation
+        Exit Sub
+    End If
 
-    ' Générer le nom de fichier automatique
-    nomFichierAuto = "Archives-Souverains-T" & trimestre & "-" & annee & ".xlsm"
-    
-    ' Créer le chemin complet avec le nom de fichier généré automatiquement
-    nouvelleCheminComplet = cheminRepertoire & nomFichierAuto
+    ' Créer le chemin complet avec le nom de fichier entré par l'utilisateur
+    nouvelleCheminComplet = cheminRepertoire & nomFichierUtilisateur & ".xlsm"
     
     ' Si un fichier portant le même nom existe déjà, il est supprimé
     If Dir(nouvelleCheminComplet) <> "" Then
