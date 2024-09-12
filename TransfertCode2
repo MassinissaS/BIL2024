@@ -1,7 +1,9 @@
-Sub SauvegarderCopie()
+Sub SauvegarderVersionModifiee()
     Dim cheminRepertoire As String
     Dim nomFichier As String
     Dim nouvelleCheminComplet As String
+    Dim wbCopie As Workbook
+    Dim ws As Worksheet
 
     ' Définir le répertoire de sauvegarde (modifiez ce chemin selon vos besoins)
     cheminRepertoire = "C:\Chemin\De\Votre\Répertoire\"
@@ -12,17 +14,36 @@ Sub SauvegarderCopie()
         Exit Sub
     End If
 
-    ' Générer le nom de fichier basé sur le nom actuel (sans modification)
+    ' Générer le nom de fichier basé sur le nom actuel
     nomFichier = ThisWorkbook.Name
     nouvelleCheminComplet = cheminRepertoire & nomFichier
-
-    ' Si le fichier existe déjà, il est supprimé
-    If Dir(nouvelleCheminComplet) <> "" Then
-        Kill nouvelleCheminComplet
-    End If
-
+    
     ' Sauvegarder une copie du fichier
     ThisWorkbook.SaveCopyAs nouvelleCheminComplet
 
-    MsgBox "Le fichier a été sauvegardé avec succès dans " & nouvelleCheminComplet, vbInformation
+    ' Ouvrir la copie du fichier
+    Set wbCopie = Workbooks.Open(nouvelleCheminComplet)
+    
+    ' Supprimer tous les onglets sauf "1Current", "2Thresholds", et "3Summary"
+    For Each ws In wbCopie.Worksheets
+        If ws.Name <> "1Current" And ws.Name <> "2Thresholds" And ws.Name <> "3Summary" Then
+            Application.DisplayAlerts = False
+            ws.Delete
+            Application.DisplayAlerts = True
+        End If
+    Next ws
+
+    ' Renommer les onglets
+    wbCopie.Sheets("1Current").Name = "Current"
+    wbCopie.Sheets("2Thresholds").Name = "Thresholds"
+    wbCopie.Sheets("3Summary").Name = "Summary"
+
+    ' Réorganiser les onglets pour que "Summary" soit en première position
+    wbCopie.Sheets("Summary").Move Before:=wbCopie.Sheets(1)
+
+    ' Sauvegarder et fermer le fichier
+    wbCopie.Close SaveChanges:=True
+
+    ' Avertir l'utilisateur
+    MsgBox "La version modifiée a été sauvegardée avec succès dans " & nouvelleCheminComplet, vbInformation
 End Sub
